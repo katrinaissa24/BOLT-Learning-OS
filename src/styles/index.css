@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* ───────────── BOLT design tokens (from the EduBolt brand guidelines) ───────────── */
+@theme {
+  --color-mango: #FF9900;
+  --color-mango-50: #FFF4E5;
+  --color-mango-100: #FFE5BF;
+  --color-mango-200: #FFCC80;
+  --color-mango-300: #FFB340;
+  --color-mango-600: #E58900;
+  --color-mango-700: #C27400;
+
+  --color-charcoal: #353B48;
+  --color-charcoal-50: #F4F5F7;
+  --color-charcoal-100: #E6E8EC;
+  --color-charcoal-200: #C9CBD0;
+  --color-charcoal-300: #9EA1A8;
+  --color-charcoal-400: #6C717B;
+  --color-charcoal-500: #4B5160;
+  --color-charcoal-700: #272C36;
+  --color-charcoal-900: #1C2028;
+
+  --color-ink: #353B48;
+  --color-paper: #FFFFFF;
+  --color-cloud: #F7F7F9;
+
+  --color-success: #2FA36B;
+  --color-success-soft: #E3F5EB;
+  --color-warning: #FF9900;
+  --color-warning-soft: #FFF4E5;
+  --color-danger: #E0493B;
+  --color-danger-soft: #FCE8E6;
+  --color-info: #3B82F6;
+  --color-info-soft: #E8F0FE;
+
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", "Ink Free", cursive;
+
+  --radius-xl2: 1.25rem;
+  --shadow-soft: 0 10px 30px -12px rgba(53, 59, 72, 0.18);
+  --shadow-card: 0 1px 2px rgba(53, 59, 72, 0.06), 0 8px 24px -16px rgba(53, 59, 72, 0.25);
+}
+
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-cloud);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Handwritten accent (Halimun / Ink Free in the brand guide, Caveat on the web) */
+.font-hand { font-family: var(--font-hand); }
+
+/* Orange squiggle underline used under headings in the brand deck */
+.squiggle { position: relative; display: inline-block; }
+.squiggle::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -0.35em; height: 0.55em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M2 12 C 40 2, 70 20, 100 10 S 160 4, 198 12' fill='none' stroke='%23FF9900' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat;
+  background-size: 100% 100%;
+}
+
+/* Lightning-bolt pattern (brand graphic element) */
+.bolt-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M62 6 L30 58 H54 L44 112 L90 46 H64 Z' fill='none' stroke='%23FF9900' stroke-width='3' stroke-linejoin='round' opacity='0.35'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+.bolt-pattern-dark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M62 6 L30 58 H54 L44 112 L90 46 H64 Z' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+
+/* Scrollbars */
+* { scrollbar-width: thin; scrollbar-color: #C9CBD0 transparent; }
+
+/* Cards */
+.card { background: var(--color-paper); border-radius: 1.25rem; box-shadow: var(--shadow-card); border: 1px solid var(--color-charcoal-100); }
+
+/* Range inputs styled in brand */
+input[type="range"] { accent-color: var(--color-mango); }
+
+/* Simple fade-in */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none; } }
+.fade-up { animation: fadeUp .45s ease both; }
+
+/* Passport paper */
+.passport-paper {
+  background-color: #FBF7EF;
+  background-image: radial-gradient(rgba(53,59,72,0.06) 0.6px, transparent 0.6px);
+  background-size: 6px 6px;
+}
