@@ -23,7 +23,7 @@ Without Supabase keys the app runs in **local demo mode** (everything works, dat
 Run the files in the SQL editor, in order:
 
 1. `supabase/01_schema.sql` — tables, RLS, and the trigger that links new auth users to profiles.
-2. `supabase/02a_core.sql`, `02b_progress.sql`, `02c_points.sql`, `02d_attendance.sql`, `02e_activity.sql` — run in that order (split so each fits comfortably in the SQL editor). Generated from `src/data/seed.js` with `npm run gen:sql`.
+2. `supabase/02_seed_part1.sql`, `02_seed_part2.sql`, `02_seed_part3.sql` — run in that order. Generated from `src/data/seed.js` with `npm run gen:sql`; repetitive rows (attendance, enrollments) are built by SQL so each file stays small.
 3. `supabase/03_demo_users.sql` — three confirmed demo users (no email verification).
 
 Then put `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env`.
