@@ -113,7 +113,7 @@ Answer in 3–6 short lines. Anchor your answer to what the video is saying at t
   }
 
   return (
-    <div className="card flex flex-col h-full min-h-[560px]">
+    <div className="card flex flex-col h-full min-h-0">
       <div className="px-5 py-4 border-b border-charcoal-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-2xl bg-charcoal text-white flex items-center justify-center shrink-0"><Sparkles size={18} className="text-mango" /></div>

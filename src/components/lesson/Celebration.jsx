@@ -1,23 +1,30 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, ArrowRight, Map, GitBranch, X } from 'lucide-react'
+import { Zap, ArrowRight, Map, GitBranch, X, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '../ui'
+import { playCelebration, soundOn, setSoundOn } from '../../lib/sound'
 
 const COLORS = ['#FF9900', '#353B48', '#5B7CFA', '#2FA36B', '#E255A1', '#FFCC80']
 
 /** Full-screen celebration after a checkpoint is cleared. */
-export default function Celebration({ open, score, points, lesson, courseId, nextLesson, onClose }) {
+export default function Celebration({ open, score, points, lesson, courseId, nextLesson, onClose, onBranch }) {
+  const [sound, setSound] = useState(soundOn)
   const pieces = useMemo(() => Array.from({ length: 28 }, (_, i) => ({ id: i, x: (i / 28) * 100 + (Math.random() * 3 - 1.5), delay: Math.random() * 0.5, dur: 1.8 + Math.random() * 1.2, rot: Math.random() * 720 - 360, color: COLORS[i % COLORS.length], w: 8 + Math.random() * 8, h: 10 + Math.random() * 10 })), [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  const weak = score < 60
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose?.()
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
-  const weak = score < 60
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    playCelebration(weak ? 'soft' : 'win')
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prevOverflow }
+  }, [open, onClose, weak])
+  const toggleSound = () => { const next = !sound; setSound(next); setSoundOn(next); if (next) playCelebration(weak ? 'soft' : 'win') }
   const R = 44, circ = 2 * Math.PI * R
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
@@ -26,7 +33,8 @@ export default function Celebration({ open, score, points, lesson, courseId, nex
           ))}
           <motion.div className="relative card w-full max-w-lg p-8 text-center overflow-hidden" initial={{ scale: 0.8, y: 30, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
             <div className="absolute inset-0 bolt-pattern opacity-30 pointer-events-none [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
-            <button type="button" onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-charcoal-100 text-charcoal-400" aria-label="Close"><X size={18} /></button>
+            <button type="button" onClick={toggleSound} className="absolute top-4 left-4 z-10 p-2 rounded-full hover:bg-charcoal-100 text-charcoal-400" aria-label={sound ? 'Mute celebration sound' : 'Turn celebration sound on'} title={sound ? 'Sound on' : 'Sound off'}>{sound ? <Volume2 size={18} /> : <VolumeX size={18} />}</button>
+            <button type="button" onClick={onClose} className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-charcoal-100 text-charcoal-400" aria-label="Close"><X size={18} /></button>
             <div className="relative">
               <div className="font-hand text-mango text-3xl leading-none">{weak ? 'checkpoint logged' : 'checkpoint cleared!'}</div>
               <h2 className="text-2xl font-extrabold tracking-tight text-charcoal mt-1">{lesson.title}</h2>
@@ -44,12 +52,12 @@ export default function Celebration({ open, score, points, lesson, courseId, nex
               </motion.div>
 
               <p className="text-sm text-charcoal-400 mt-4 max-w-sm mx-auto">
-                {weak ? 'Below 60 — so the journey branches. A short extra-practice path is waiting for you below: finish it to earn 40 more points and lift this score.' : score === 100 ? 'First try. That is exactly what mastery looks like — on to the next checkpoint.' : 'Solid. The tutor and the interactive are still here if you want to make it a 100 next time.'}
+                {weak ? 'Below 60 — so the journey branches. A short extra-practice path is waiting on the next slide: finish it to earn 40 more points and lift this score.' : score === 100 ? 'First try. That is exactly what mastery looks like — on to the next checkpoint.' : 'Solid. The tutor and the interactive are still here if you want to make it a 100 next time.'}
               </p>
 
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {weak ? (
-                  <Button onClick={() => { onClose?.(); setTimeout(() => document.getElementById('branch')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }}><GitBranch size={16} /> Branch out: extra practice</Button>
+                  <Button onClick={() => { onClose?.(); onBranch?.() }}><GitBranch size={16} /> Branch out: extra practice</Button>
                 ) : nextLesson ? (
                   <Button to={`/student/courses/${courseId}/lessons/${nextLesson.id}`} onClick={onClose}>Next checkpoint <ArrowRight size={16} /></Button>
                 ) : (
@@ -61,6 +69,7 @@ export default function Celebration({ open, score, points, lesson, courseId, nex
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

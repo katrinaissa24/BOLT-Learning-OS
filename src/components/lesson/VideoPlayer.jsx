@@ -23,7 +23,7 @@ function loadYT(timeoutMs = 4000) {
  * Reports the current playback time via onTime(seconds). Falls back to a plain iframe plus a
  * "where are you in the video" slider when the IFrame API is unavailable — never throws.
  */
-export default function VideoPlayer({ lesson, currentTime, onTime }) {
+export default function VideoPlayer({ lesson, currentTime, onTime, active = true }) {
   const [mode, setMode] = useState('loading') // loading | api | fallback
   const hostRef = useRef(null)
   const playerRef = useRef(null)
@@ -68,14 +68,20 @@ export default function VideoPlayer({ lesson, currentTime, onTime }) {
     return () => clearInterval(id)
   }, [mode, onTime])
 
+  // pause when the student flips to another slide
+  useEffect(() => {
+    if (active || mode !== 'api') return
+    try { playerRef.current?.pauseVideo?.() } catch { /* ignore */ }
+  }, [active, mode])
+
   const seek = (t) => {
     onTime(t)
     if (mode === 'api') { try { playerRef.current?.seekTo?.(t, true); playerRef.current?.playVideo?.() } catch { /* ignore */ } }
   }
 
   return (
-    <div className="card overflow-hidden">
-      <div className="relative aspect-video bg-charcoal-900">
+    <div className="card overflow-hidden flex flex-col h-full min-h-0">
+      <div className="relative aspect-video max-h-[64%] shrink-0 bg-charcoal-900">
         {mode !== 'fallback' && <div ref={hostRef} className="absolute inset-0 w-full h-full" />}
         {mode === 'fallback' && (
           <iframe title={lesson.title} className="absolute inset-0 w-full h-full" src={`https://www.youtube-nocookie.com/embed/${lesson.youtube_id}?rel=0&modestbranding=1`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
@@ -93,12 +99,12 @@ export default function VideoPlayer({ lesson, currentTime, onTime }) {
         </div>
       )}
 
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-5 flex-1 min-h-0 flex flex-col">
+        <div className="flex items-center justify-between mb-3 shrink-0">
           <div className="flex items-center gap-2 text-sm font-bold text-charcoal"><ListVideo size={16} className="text-mango" /> Transcript timeline</div>
           <span className="text-xs text-charcoal-400">click a line to jump · now at <span className="font-bold text-charcoal tabular-nums">{fmtTime(currentTime)}</span></span>
         </div>
-        <ol className="relative border-l-2 border-charcoal-100 ml-2 space-y-1">
+        <ol className="relative border-l-2 border-charcoal-100 ml-2 space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
           {transcript.map((seg, i) => {
             const active = i === activeIdx
             return (

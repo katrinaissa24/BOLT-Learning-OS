@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ChevronRight, Map, Clock, Puzzle, Flag, ArrowRight, ArrowLeft, BookOpen } from 'lucide-react'
-import { Button, Card, Pill, SkillChip, EmptyState } from '../../components/ui'
+import { ChevronRight, Map, Puzzle, Flag, ArrowRight, ArrowLeft, BookOpen, PlayCircle, GitBranch, Check } from 'lucide-react'
+import { Button, Card, Pill, EmptyState } from '../../components/ui'
 import { useData } from '../../lib/data'
 import { useAuth } from '../../lib/auth'
 import { lessonById, courseById, courseLessons, progressFor } from '../../lib/selectors'
@@ -12,7 +12,13 @@ import TutorChat from '../../components/lesson/TutorChat'
 import CheckpointQuestion from '../../components/lesson/CheckpointQuestion'
 import PracticeBranch from '../../components/lesson/PracticeBranch'
 import Celebration from '../../components/lesson/Celebration'
+import { cx } from '../../lib/utils'
 
+/**
+ * A lesson is a deck of slides that fits the screen: Watch → Explore → Prove it (→ Practice when
+ * the score is below 60). Every slide stays mounted, so the video position, tutor chat and
+ * simulation settings survive flipping back and forth.
+ */
 export default function Lesson() {
   const { courseId, lessonId } = useParams()
   const { db, awardPoints, upsertLessonProgress, awardBadge } = useData()
@@ -31,11 +37,39 @@ export default function Lesson() {
   const [result, setResult] = useState(null)
   const [celebration, setCelebration] = useState(null) // { score, points }
   const [branch, setBranch] = useState(null) // { baseScore }
+  const [slide, setSlide] = useState(0)
   const openedAt = useRef(Date.now())
 
-  useEffect(() => { setCurrentTime(0); setResult(null); setCelebration(null); setBranch(null); openedAt.current = Date.now(); window.scrollTo({ top: 0 }) }, [lessonId])
+  useEffect(() => { setCurrentTime(0); setResult(null); setCelebration(null); setBranch(null); setSlide(0); openedAt.current = Date.now(); window.scrollTo({ top: 0 }) }, [lessonId])
   const onTime = useCallback((t) => setCurrentTime(t), [])
   const onResult = useCallback((v) => setResult(v), [])
+
+  const steps = useMemo(() => {
+    const list = [
+      { key: 'watch', label: 'Watch', title: 'Watch with your tutor', icon: PlayCircle },
+      { key: 'explore', label: 'Explore', title: 'Play with the idea', icon: Puzzle },
+    ]
+    if (activity?.question) list.push({ key: 'prove', label: 'Prove it', title: 'Checkpoint question', icon: Flag })
+    if (branch) list.push({ key: 'practice', label: 'Practice', title: 'Extra practice', icon: GitBranch })
+    return list
+  }, [activity, branch])
+
+  const last = steps.length - 1
+  const go = useCallback((i) => setSlide((s) => Math.max(0, Math.min(last, typeof i === 'function' ? i(s) : i))), [last])
+  const goTo = useCallback((key) => { const i = steps.findIndex((s) => s.key === key); if (i >= 0) setSlide(i) }, [steps])
+
+  // ← → flip slides, unless the student is typing or dragging a slider
+  useEffect(() => {
+    const onKey = (e) => {
+      if (celebration) return
+      const el = e.target
+      if (el?.closest?.('input, textarea, select, [contenteditable="true"]')) return
+      if (e.key === 'ArrowRight') go((s) => s + 1)
+      if (e.key === 'ArrowLeft') go((s) => s - 1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [go, celebration])
 
   const complete = useCallback(async (score) => {
     if (!lesson || !profile) return
@@ -62,79 +96,112 @@ export default function Lesson() {
     return <EmptyState icon={BookOpen} title="Lesson not found" text="This checkpoint does not exist on your journey." action={<Button to="/student/courses"><Map size={16} /> Back to my courses</Button>} />
   }
 
-  return (
-    <div className="space-y-8">
-      {/* breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-charcoal-400 !mb-0 -mt-2">
-        <Link to="/student/courses" className="hover:text-charcoal">My courses</Link><ChevronRight size={14} />
-        <Link to={`/student/courses/${courseId}`} className="hover:text-charcoal font-semibold" style={{ color: course.color }}>{course.title}</Link><ChevronRight size={14} />
-        <span className="text-charcoal font-semibold truncate">Checkpoint {lesson.position}</span>
-      </nav>
+  const completed = progress?.status === 'completed'
+  const step = steps[slide] || steps[0]
 
-      {/* header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 !mt-4">
-        <div className="min-w-0">
-          <div className="font-hand text-2xl leading-none mb-1" style={{ color: course.color }}>checkpoint {lesson.position} of {lessons.length}</div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-charcoal">{lesson.title}</h1>
-          <p className="text-charcoal-400 mt-2 max-w-2xl">{lesson.summary}</p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {lesson.topics.map((t) => <span key={t.id} className="rounded-full bg-white border border-charcoal-200 px-2.5 py-0.5 text-[11px] font-semibold text-charcoal-500">{t.name}</span>)}
-            <span className="w-px h-4 bg-charcoal-200 mx-1" />
-            {lesson.skills.map((s) => <SkillChip key={s} skill={s} />)}
-            <span className="inline-flex items-center gap-1 text-xs text-charcoal-400 ml-1"><Clock size={12} /> {lesson.duration_min} min video</span>
-            {progress?.status === 'completed' && <Pill tone="success">Completed · {progress.score}%</Pill>}
-            {progress?.status === 'in-progress' && <Pill tone="mango">In progress</Pill>}
-          </div>
+  const render = (key, active) => {
+    if (key === 'watch') {
+      return (
+        <div className="h-full grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5">
+          <div className="min-h-[420px] lg:min-h-0"><VideoPlayer lesson={lesson} currentTime={currentTime} onTime={onTime} active={active} /></div>
+          <div className="h-[520px] lg:h-full min-h-0"><TutorChat lesson={lesson} course={course} currentTime={currentTime} studentId={profile.id} /></div>
         </div>
-        <div className="flex items-center gap-2">
-          {prevLesson ? <Button to={`/student/courses/${courseId}/lessons/${prevLesson.id}`} variant="secondary" size="sm"><ArrowLeft size={14} /> Previous</Button> : null}
-          <Button to={`/student/courses/${courseId}`} variant="secondary" size="sm"><Map size={14} /> Journey</Button>
-          {nextLesson ? <Button to={`/student/courses/${courseId}/lessons/${nextLesson.id}`} variant="dark" size="sm">Next <ArrowRight size={14} /></Button> : null}
-        </div>
-      </div>
-
-      {/* video + tutor */}
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 items-start">
-        <VideoPlayer lesson={lesson} currentTime={currentTime} onTime={onTime} />
-        <div className="lg:sticky lg:top-24 h-[640px]">
-          <TutorChat lesson={lesson} course={course} currentTime={currentTime} studentId={profile.id} />
-        </div>
-      </div>
-
-      {/* interactive */}
-      <section>
-        <div className="flex items-end justify-between gap-3 mb-4">
-          <div>
-            <div className="font-hand text-mango text-xl leading-none mb-1">interactive</div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-charcoal squiggle">Play with the idea</h2>
-          </div>
-          <Pill tone="neutral" icon={Puzzle}>{activity?.component?.replace(/-/g, ' ') || 'activity'}</Pill>
-        </div>
-        <Card className="p-6">
-          {activity ? (
-            <Interactive component={activity.component} onResult={onResult} lesson={lesson} course={course} prompt={activity.essayPrompt} studentId={profile.id} />
-          ) : (
-            <EmptyState icon={Puzzle} title="No interactive yet" text="This lesson’s simulation is on its way." />
-          )}
+      )
+    }
+    if (key === 'explore') {
+      return (
+        <Card className="p-6 min-h-full">
+          {activity ? <Interactive component={activity.component} onResult={onResult} lesson={lesson} course={course} prompt={activity.essayPrompt} studentId={profile.id} />
+            : <EmptyState icon={Puzzle} title="No interactive yet" text="This lesson’s simulation is on its way." />}
         </Card>
-      </section>
-
-      {/* checkpoint */}
-      {activity?.question && (
-        <section className="space-y-6">
-          <div className="flex items-end justify-between gap-3 mb-4">
-            <div>
-              <div className="font-hand text-mango text-xl leading-none mb-1">prove it</div>
-              <h2 className="text-2xl font-extrabold tracking-tight text-charcoal squiggle">Checkpoint question</h2>
-            </div>
-            <span className="text-xs text-charcoal-400 flex items-center gap-1"><Flag size={12} /> 100 + score ÷ 2 points</span>
+      )
+    }
+    if (key === 'prove') {
+      return (
+        <div className="max-w-3xl mx-auto w-full min-h-full flex flex-col justify-center gap-3 py-2">
+          <div className="flex items-center justify-between gap-3 text-xs text-charcoal-400">
+            <span>Your answer uses what you found on the Explore slide. Flip back any time.</span>
+            <span className="flex items-center gap-1 shrink-0"><Flag size={12} /> 100 + score ÷ 2 points</span>
           </div>
           <CheckpointQuestion lesson={lesson} question={activity.question} result={result} progress={progress} onComplete={complete} />
-          {branch && <PracticeBranch lesson={lesson} course={course} studentName={profile.full_name} baseScore={branch.baseScore} onFinish={onBranchFinish} />}
-        </section>
-      )}
+        </div>
+      )
+    }
+    if (key === 'practice' && branch) {
+      return <div className="max-w-4xl mx-auto w-full py-2"><PracticeBranch lesson={lesson} course={course} studentName={profile.full_name} baseScore={branch.baseScore} onFinish={onBranchFinish} /></div>
+    }
+    return null
+  }
 
-      <Celebration open={!!celebration} score={celebration?.score ?? 0} points={celebration?.points ?? 0} lesson={lesson} courseId={courseId} nextLesson={nextLesson} onClose={() => setCelebration(null)} />
+  return (
+    <div className="flex flex-col gap-4 -mt-2 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-8rem)] min-h-[560px]">
+      {/* top bar: where you are + the slide stepper */}
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 shrink-0">
+        <div className="min-w-0">
+          <nav className="flex items-center gap-1.5 text-xs text-charcoal-400">
+            <Link to={`/student/courses/${courseId}`} className="font-semibold hover:underline" style={{ color: course.color }}>{course.title}</Link>
+            <ChevronRight size={12} />
+            <span>Checkpoint {lesson.position} of {lessons.length}</span>
+            {completed && <Pill tone="success" className="ml-1">Completed · {progress.score}%</Pill>}
+          </nav>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-charcoal truncate">{lesson.title}</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <ol className="flex items-center gap-1 rounded-2xl bg-charcoal-100 p-1" aria-label="Lesson slides">
+            {steps.map((s, i) => {
+              const isActive = i === slide
+              const done = (s.key === 'prove' && completed) || i < slide
+              return (
+                <li key={s.key}>
+                  <button type="button" onClick={() => go(i)} aria-current={isActive ? 'step' : undefined}
+                    className={cx('flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold transition-all', isActive ? 'bg-white text-charcoal shadow-sm' : 'text-charcoal-400 hover:text-charcoal')}>
+                    <span className={cx('w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold', isActive ? 'bg-mango text-white' : done ? 'bg-success text-white' : 'bg-white text-charcoal-400')}>
+                      {done && !isActive ? <Check size={12} /> : i + 1}
+                    </span>
+                    <span className="hidden sm:inline">{s.label}</span>
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
+          <Button to={`/student/courses/${courseId}`} variant="secondary" size="sm"><Map size={14} /> Journey</Button>
+        </div>
+      </header>
+
+      {/* slides: one thing at a time */}
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        {steps.map((s, i) => (
+          <section key={s.key} aria-label={s.title} aria-hidden={i !== slide} inert={i !== slide}
+            className="absolute inset-0 overflow-y-auto overscroll-contain p-1 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none"
+            style={{ transform: `translateX(${(i - slide) * 104}%)`, opacity: i === slide ? 1 : 0 }}>
+            {render(s.key, i === slide)}
+          </section>
+        ))}
+      </div>
+
+      {/* bottom navigation */}
+      <footer className="flex items-center justify-between gap-3 shrink-0">
+        <div className="flex-1 flex">
+          {slide > 0
+            ? <Button variant="secondary" onClick={() => go(slide - 1)}><ArrowLeft size={16} /> {steps[slide - 1].label}</Button>
+            : prevLesson ? <Button variant="ghost" to={`/student/courses/${courseId}/lessons/${prevLesson.id}`}><ArrowLeft size={16} /> Previous checkpoint</Button> : null}
+        </div>
+        <div className="hidden sm:flex items-center gap-2 text-xs text-charcoal-400">
+          <step.icon size={14} className="text-mango" /> <span className="font-semibold text-charcoal">{step.title}</span>
+          <span>· {slide + 1} / {steps.length}</span>
+          <span className="hidden md:inline">· use ← → to flip</span>
+        </div>
+        <div className="flex-1 flex justify-end">
+          {slide < last
+            ? <Button onClick={() => go(slide + 1)}>Next: {steps[slide + 1].label} <ArrowRight size={16} /></Button>
+            : completed && nextLesson
+              ? <Button to={`/student/courses/${courseId}/lessons/${nextLesson.id}`}>Next checkpoint <ArrowRight size={16} /></Button>
+              : <Button variant="dark" to={`/student/courses/${courseId}`}><Map size={16} /> Back to journey</Button>}
+        </div>
+      </footer>
+
+      <Celebration open={!!celebration} score={celebration?.score ?? 0} points={celebration?.points ?? 0} lesson={lesson} courseId={courseId} nextLesson={nextLesson}
+        onClose={() => setCelebration(null)} onBranch={() => setTimeout(() => goTo('practice'), 0)} />
     </div>
   )
 }

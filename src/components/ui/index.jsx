@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { X, Sparkles, Loader2 } from 'lucide-react'
 import { cx, initials } from '../../lib/utils'
@@ -110,17 +111,25 @@ export function ProgressBar({ value = 0, tone = 'mango', className = '', height 
   )
 }
 /**
- * Score bands: 0–29 red, 30–59 yellow (both "weak"), 60–79 mango, 80+ green.
+ * Score bands: 0–29 red, 30–59 yellow (both "weak"), 60–79 orange into yellow, 80+ green.
  * A weak bar reveals a track-wide gradient, so the first 30% is always red and the
  * stretch from 30% to 60% is yellow. A 51% bar shows red then yellow; a 25% bar is all red.
  */
 export const WEAK_GRADIENT = 'linear-gradient(90deg, var(--color-danger) 0%, var(--color-danger) 26%, var(--color-caution) 34%, var(--color-caution) 100%)'
+/** 60–79%: orange into yellow, no red. */
+export const FORMING_GRADIENT = 'linear-gradient(90deg, var(--color-mango) 0%, var(--color-mango) 35%, var(--color-caution) 100%)'
 export const scoreBand = (s) => (s >= 80 ? 'strong' : s >= 60 ? 'forming' : s >= 30 ? 'weak' : 'critical')
 export const scoreTextClass = (s) => ({ strong: 'text-success', forming: 'text-mango-700', weak: 'text-caution-ink', critical: 'text-danger' }[scoreBand(s)])
 export function ScoreBar({ score, className = '' }) {
   const v = Math.min(100, Math.max(0, Number(score) || 0))
   if (v >= 80) return <ProgressBar value={v} tone="success" className={className} />
-  if (v >= 60) return <ProgressBar value={v} tone="mango" className={className} />
+  if (v >= 60) {
+    return (
+      <div className={cx('w-full h-2 rounded-full bg-charcoal-100 overflow-hidden', className)} role="meter" aria-valuenow={v} aria-valuemin={0} aria-valuemax={100}>
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${v}%`, background: FORMING_GRADIENT }} />
+      </div>
+    )
+  }
   return (
     <div className={cx('w-full h-2 rounded-full bg-charcoal-100 overflow-hidden', className)} role="meter" aria-valuenow={v} aria-valuemin={0} aria-valuemax={100}>
       <div className="h-full rounded-full overflow-hidden transition-all duration-700" style={{ width: `${v}%` }}>
@@ -148,8 +157,8 @@ export function Modal({ open, onClose, title, children, wide = false, className 
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
   }, [open, onClose])
   if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm fade-up" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
       <div className={cx('bg-white rounded-3xl shadow-2xl w-full max-h-[92vh] overflow-y-auto', wide ? 'max-w-5xl' : 'max-w-2xl', className)}>
         {(title || onClose) && (
           <div className="flex items-center justify-between px-6 pt-5 pb-3 sticky top-0 bg-white/95 backdrop-blur z-10">
@@ -159,7 +168,8 @@ export function Modal({ open, onClose, title, children, wide = false, className 
         )}
         <div className="px-6 pb-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
