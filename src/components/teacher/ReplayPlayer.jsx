@@ -119,7 +119,7 @@ export default function ReplayPlayer({ process, studentName }) {
         {/* event feed */}
         <div className="lg:col-span-2">
           <div className="text-[11px] uppercase tracking-wide font-semibold text-charcoal-400 mb-1">Event feed</div>
-          <div ref={feedRef} className="max-h-[360px] overflow-y-auto pr-1 space-y-1.5">
+          <div ref={feedRef} className="relative max-h-[360px] overflow-y-auto pr-1 space-y-1.5">
             {events.map((e, i) => {
               const m = EVENT_META[e.type]
               const reached = e.t <= cursor

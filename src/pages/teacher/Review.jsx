@@ -46,8 +46,8 @@ function SubmissionList({ db }) {
                 <td className="px-5 py-3"><Link to={`/teacher/review/${s.id}`} className="flex items-center gap-3"><Avatar name={s.student?.full_name || ''} size="sm" /><div className="leading-tight"><div className="font-bold text-charcoal">{s.student?.full_name}</div><div className="text-xs text-charcoal-400">“{s.title}” {s.process ? <Pill tone="mango" className="ml-1">full replay</Pill> : null}</div></div></Link></td>
                 <td className="px-4 py-3"><StatusPill status={s.status} /></td>
                 <td className="px-4 py-3 text-right tabular-nums font-semibold">{s.metrics.words}</td>
-                <td className="px-4 py-3 text-right tabular-nums"><span className="font-semibold">{fmtDur(s.metrics.total_seconds)}</span><span className="text-xs text-charcoal-400"> · {fmtDur(s.metrics.active_seconds)} active</span></td>
-                <td className="px-4 py-3 text-right tabular-nums"><span className={cx('font-semibold', s.ai_usage.share_of_text > 0.3 ? 'text-danger' : 'text-charcoal')}>{Math.round(s.ai_usage.share_of_text * 100)}%</span>{s.ai_usage.prompts > 0 && <span className="text-xs text-charcoal-400"> · {s.ai_usage.declared ? 'declared' : 'undeclared'}</span>}</td>
+                <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap"><div className="font-semibold">{fmtDur(s.metrics.total_seconds)}</div><div className="text-xs text-charcoal-400">{fmtDur(s.metrics.active_seconds)} active</div></td>
+                <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap"><div className={cx('font-semibold', s.ai_usage.share_of_text > 0.3 ? 'text-danger' : 'text-charcoal')}>{Math.round(s.ai_usage.share_of_text * 100)}%</div>{s.ai_usage.prompts > 0 && <div className="text-xs text-charcoal-400">{s.ai_usage.declared ? 'declared' : 'undeclared'}</div>}</td>
                 <td className="px-4 py-3 text-right tabular-nums">{Math.round(s.metrics.revision_ratio * 100)}%</td>
                 <td className="px-4 py-3"><div className="flex flex-wrap gap-1">{s.flags.length ? s.flags.map((f) => <Pill key={f.id} tone={severityTone(f.severity)} title={f.detail}>{f.label}</Pill>) : <span className="text-xs text-success font-semibold inline-flex items-center gap-1"><CheckCircle2 size={13} /> clean</span>}</div></td>
                 <td className="px-4 py-3 text-right font-extrabold tabular-nums">{s.grade != null ? `${s.grade}/20` : <span className="text-charcoal-300 font-normal">—</span>}</td>
@@ -73,6 +73,7 @@ function SubmissionDetail({ sub }) {
   const [grade, setGrade] = useState(sub.grade ?? '')
   const [feedback, setFeedback] = useState(sub.teacher_feedback ?? '')
   const hasStamp = db.studentBadges.some((b) => b.student_id === sub.student_id && b.badge_id === 'honest-process')
+  const stampEligible = sub.ai_usage.declared && sub.ai_usage.share_of_text < 0.3 && !flags.some((f) => f.severity === 'high')
   const m = sub.metrics
   const first = student?.full_name.split(' ')[0]
   const aiTexts = (sub.process || []).filter((e) => e.type === 'ai_insert').map((e) => e.text)
@@ -103,7 +104,7 @@ function SubmissionDetail({ sub }) {
           <h1 className="text-3xl font-extrabold tracking-tight text-charcoal">“{sub.title}”</h1>
           <div className="text-charcoal-400 mt-1 flex flex-wrap items-center gap-2"><Link to={`/teacher/tracker/${sub.student_id}`} className="font-semibold text-charcoal hover:text-mango">{student?.full_name}</Link> · submitted {new Date(sub.submitted_at).toLocaleString('en', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} <StatusPill status={sub.status} />{sub.ai_usage.declared ? <Pill tone="success" icon={ShieldCheck}>AI declared · {sub.ai_usage.mode}</Pill> : sub.ai_usage.prompts > 0 ? <Pill tone="danger">AI not declared</Pill> : null}</div>
         </div>
-        <Button variant={hasStamp ? 'secondary' : 'dark'} onClick={stamp} disabled={hasStamp}><ShieldCheck size={16} /> {hasStamp ? 'Honest Process stamped' : 'Award Honest Process stamp'}</Button>
+        <Button variant={hasStamp ? 'secondary' : 'dark'} onClick={stamp} disabled={hasStamp || !stampEligible} title={!stampEligible && !hasStamp ? 'Requires declared AI use (or none) and no high-severity flag' : undefined}><ShieldCheck size={16} /> {hasStamp ? 'Honest Process stamped' : stampEligible ? 'Award Honest Process stamp' : 'Not eligible for Honest Process'}</Button>
       </div>
 
       {flags.length > 0 && (
@@ -133,18 +134,18 @@ function SubmissionDetail({ sub }) {
         )}
       </Card>
 
-      <div className="grid lg:grid-cols-5 gap-6">
+      <div className={cx('grid gap-6', sub.content ? 'lg:grid-cols-5' : 'lg:grid-cols-2')}>
         {/* essay */}
-        <Card className="lg:col-span-3">
+        {sub.content && <Card className="lg:col-span-3">
           <SectionHeader squiggle={false} eyebrow="final text" title="The essay" subtitle={aiTexts.length ? 'Sentences inserted from an AI reply are highlighted.' : undefined} className="mb-4" />
           {sub.content ? (
             <div className="prose-sm max-w-none space-y-4 text-charcoal leading-relaxed">
               {sub.content.split('\n\n').map((para, i) => <p key={i} className={i === 0 ? 'text-lg font-extrabold tracking-tight' : ''}>{highlight(para, aiTexts)}</p>)}
             </div>
-          ) : <div className="text-sm text-charcoal-400">Text not stored for this submission (metrics-only import).</div>}
-        </Card>
+          ) : null}
+        </Card>}
 
-        <div className="lg:col-span-2 space-y-6">
+        <div className={cx(sub.content ? 'lg:col-span-2 space-y-6' : 'contents')}>
           {/* insights */}
           <Card>
             <SectionHeader squiggle={false} eyebrow="thinking path" title="Insights" className="mb-3" />

@@ -50,6 +50,15 @@ export function computeInsights(sub, firstName = 'The student') {
   const ai = sub.ai_usage || {}
   const p = sub.process || []
   const out = []
+  const wholePaste = m.pasted_chars > 0 && m.pasted_chars >= m.words * 4 && m.active_seconds < 60
+  if (wholePaste) {
+    return [
+      { tone: 'danger', text: `${m.pasted_chars.toLocaleString()} characters arrived in a single paste and ${m.keystrokes} keystroke${m.keystrokes === 1 ? '' : 's'} followed — the text was not written in the editor.` },
+      { tone: 'danger', text: `${m.words} words in ${m.active_seconds} seconds: there is no thinking path to grade here.` },
+      { tone: 'warning', text: 'No drafts, no deletions, no pauses — the session shows the final product only.' },
+      { tone: 'neutral', text: `Submitted at ${new Date(sub.submitted_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}. Suggested next step: a 5-minute oral defense so ${firstName} can show the reasoning behind the essay.` },
+    ]
+  }
   const pauses = p.filter((e) => e.type === 'pause')
   const longest = pauses.sort((a, b) => b.seconds - a.seconds)[0]
   if (longest) out.push({ tone: 'success', text: `Spent ${longest.seconds}s thinking ${longest.note ? longest.note.toLowerCase().replace(/^long pause /, '') : 'mid-draft'} — a strong planning signal, not idling.` })
