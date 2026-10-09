@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { Avatar, BoltMark } from '../ui'
+import { Avatar } from '../ui'
 import { SKILLS, SCHOOL } from '../../data/seed'
 import { StampSlot } from './Stamp'
 import { cx } from '../../lib/utils'
@@ -27,7 +27,7 @@ export function IdentityPage({ profile, earned, db, compact = false }) {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between">
         <div className="text-[10px] font-bold tracking-[0.3em] text-charcoal-400">LEARNING PASSPORT</div>
-        <BoltMark size={24} />
+        <div className="font-extrabold text-sm tracking-tight text-charcoal">BOLT<span className="text-mango">.</span></div>
       </div>
       <div className="flex gap-4 mt-5">
         <div className="rounded-xl border-2 border-charcoal-200 p-1 bg-white rotate-[-2deg] shadow-sm"><Avatar name={profile.full_name} size="xl" className="rounded-lg" /></div>

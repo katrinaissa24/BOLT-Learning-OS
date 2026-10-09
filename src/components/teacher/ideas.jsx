@@ -5,7 +5,7 @@ import { Target, Users, Presentation, Mail, Activity, Mic, ArrowRight } from 'lu
 import { Card, SuggestedTag, Pill, Avatar, Button } from '../ui'
 import { studentsOf, studentOverview, courseById, TODAY } from '../../lib/selectors'
 import { TEACHER_IDEAS } from '../../data/teacherIdeas'
-import { BRAND, ChartTip, axisStyle, scoreColor } from './charts'
+import { BRAND, ChartTip, axisStyle, scoreColor, scoreInk } from './charts'
 
 const ICONS = { target: Target, users: Users, presentation: Presentation, mail: Mail, activity: Activity, mic: Mic }
 
@@ -144,5 +144,5 @@ export function IdeaCards({ ids, columns = 3 }) {
 
 /** Small colored score chip used across teacher pages. */
 export function ScoreChip({ score }) {
-  return <span className="inline-flex items-center justify-center rounded-lg px-2 py-0.5 text-xs font-bold text-white min-w-[42px]" style={{ background: scoreColor(score) }}>{score}%</span>
+  return <span className="inline-flex items-center justify-center rounded-lg px-2 py-0.5 text-xs font-bold text-white min-w-[42px]" style={{ background: scoreInk(score) }}>{score}%</span>
 }

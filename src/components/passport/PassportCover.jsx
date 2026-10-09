@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BoltMark } from '../ui'
+import { Stamp } from 'lucide-react'
 import { SCHOOL } from '../../data/seed'
 
 /** Closed passport cover. Click to open. */
@@ -29,7 +29,7 @@ export default function PassportCover({ onOpen, name, stampCount }) {
         <div className="flex flex-col items-center">
           <div className="w-36 h-36 rounded-full border-[3px] border-mango flex items-center justify-center bg-charcoal-700/50 shadow-[inset_0_0_30px_rgba(255,153,0,0.25)]">
             <div className="w-28 h-28 rounded-full border border-mango/50 flex items-center justify-center">
-              <BoltMark size={76} dark />
+              <Stamp size={56} strokeWidth={1.6} className="text-mango" />
             </div>
           </div>
           <div className="mt-5 text-2xl font-extrabold tracking-tight">BOLT<span className="text-mango">.</span></div>

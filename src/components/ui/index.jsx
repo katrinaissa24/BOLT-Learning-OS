@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { X, Sparkles, Loader2 } from 'lucide-react'
 import { cx, initials } from '../../lib/utils'
-export { Logo, BoltMark } from './Logo'
+export { Logo } from './Logo'
 
 /* ───────── Buttons ───────── */
 const btnBase = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150 focus:outline-none focus-visible:ring-4 focus-visible:ring-mango/30 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]'
@@ -109,9 +109,25 @@ export function ProgressBar({ value = 0, tone = 'mango', className = '', height 
     </div>
   )
 }
-export function ScoreBar({ score }) {
-  const tone = score >= 80 ? 'success' : score >= 60 ? 'mango' : 'danger'
-  return <ProgressBar value={score} tone={tone} />
+/**
+ * Score bands: 0–29 red, 30–59 yellow (both "weak"), 60–79 mango, 80+ green.
+ * A weak bar reveals a track-wide gradient, so the first 30% is always red and the
+ * stretch from 30% to 60% is yellow. A 51% bar shows red then yellow; a 25% bar is all red.
+ */
+export const WEAK_GRADIENT = 'linear-gradient(90deg, var(--color-danger) 0%, var(--color-danger) 26%, var(--color-caution) 34%, var(--color-caution) 100%)'
+export const scoreBand = (s) => (s >= 80 ? 'strong' : s >= 60 ? 'forming' : s >= 30 ? 'weak' : 'critical')
+export const scoreTextClass = (s) => ({ strong: 'text-success', forming: 'text-mango-700', weak: 'text-caution-ink', critical: 'text-danger' }[scoreBand(s)])
+export function ScoreBar({ score, className = '' }) {
+  const v = Math.min(100, Math.max(0, Number(score) || 0))
+  if (v >= 80) return <ProgressBar value={v} tone="success" className={className} />
+  if (v >= 60) return <ProgressBar value={v} tone="mango" className={className} />
+  return (
+    <div className={cx('w-full h-2 rounded-full bg-charcoal-100 overflow-hidden', className)} role="meter" aria-valuenow={v} aria-valuemin={0} aria-valuemax={100}>
+      <div className="h-full rounded-full overflow-hidden transition-all duration-700" style={{ width: `${v}%` }}>
+        <div className="h-full" style={{ width: v ? `${10000 / v}%` : 0, background: WEAK_GRADIENT }} />
+      </div>
+    </div>
+  )
 }
 
 /* ───────── Avatar ───────── */

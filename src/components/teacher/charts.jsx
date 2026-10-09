@@ -8,6 +8,8 @@ export const BRAND = {
   grid: '#E6E8EC',
   success: '#2FA36B',
   danger: '#E0493B',
+  caution: '#F5B800',
+  cautionInk: '#9A6B00',
   info: '#3B82F6',
 }
 
@@ -15,8 +17,11 @@ export const STATUS_COLOR = { ahead: BRAND.success, 'on-track': BRAND.info, behi
 export const STATUS_LABEL = { ahead: 'Ahead', 'on-track': 'On track', behind: 'Behind', 'at-risk': 'At risk' }
 export const STATUS_ORDER = ['ahead', 'on-track', 'behind', 'at-risk']
 
-export const scoreColor = (s) => (s >= 80 ? BRAND.success : s >= 60 ? BRAND.mango : BRAND.danger)
-export const scoreTint = (s) => (s >= 80 ? 'bg-success-soft text-success' : s >= 60 ? 'bg-mango-50 text-mango-700' : 'bg-danger-soft text-danger')
+/** Fill color by score band: <30 red, 30–59 yellow, 60–79 mango, 80+ green. */
+export const scoreColor = (s) => (s >= 80 ? BRAND.success : s >= 60 ? BRAND.mango : s >= 30 ? BRAND.caution : BRAND.danger)
+/** Same bands, darkened where needed so text stays readable on white. */
+export const scoreInk = (s) => (s >= 80 ? BRAND.success : s >= 60 ? '#C27400' : s >= 30 ? BRAND.cautionInk : BRAND.danger)
+export const scoreTint = (s) => (s >= 80 ? 'bg-success-soft text-success' : s >= 60 ? 'bg-mango-50 text-mango-700' : s >= 30 ? 'bg-caution-soft text-caution-ink' : 'bg-danger-soft text-danger')
 
 /** Card-styled tooltip for recharts. `render(payload, label)` returns rows. */
 export function ChartTip({ active, payload, label, render, title }) {

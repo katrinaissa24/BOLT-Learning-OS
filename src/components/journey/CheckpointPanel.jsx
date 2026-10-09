@@ -1,5 +1,5 @@
 import { Clock, GitBranch, PlayCircle, Lock, CheckCircle2, X, Target } from 'lucide-react'
-import { Card, Button, Pill, StatusPill, ScoreBar, SkillChip } from '../../components/ui'
+import { Card, Button, Pill, StatusPill, ScoreBar, scoreTextClass, SkillChip } from '../../components/ui'
 import { fmtDate } from '../../lib/utils'
 
 /** Side panel for a selected checkpoint. node: { lesson, progress, state, score, weakTopics } */
@@ -39,7 +39,7 @@ export default function CheckpointPanel({ node, course, onBranch, onClose, lesso
             <div key={t.id}>
               <div className="flex items-center justify-between text-sm mb-1">
                 <span className="font-semibold text-charcoal">{t.name}</span>
-                {t.score != null ? <span className={`font-extrabold ${t.score < 60 ? 'text-danger' : t.score >= 80 ? 'text-success' : 'text-mango-700'}`}>{t.score}%</span> : <span className="text-xs text-charcoal-300">not yet assessed</span>}
+                {t.score != null ? <span className={`font-extrabold ${scoreTextClass(t.score)}`}>{t.score}%</span> : <span className="text-xs text-charcoal-300">not yet assessed</span>}
               </div>
               {t.score != null ? <ScoreBar score={t.score} /> : <div className="h-2 rounded-full bg-charcoal-100" />}
             </div>

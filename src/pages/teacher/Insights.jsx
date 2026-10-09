@@ -8,7 +8,7 @@ import { ask, aiEnabled } from '../../lib/ai'
 import { lessonInsights, courseLessons, courseById, profileById, lessonById } from '../../lib/selectors'
 import { fmtTime } from '../../lib/utils'
 import VideoTimeline from '../../components/teacher/VideoTimeline'
-import { BRAND, ChartTip, axisStyle, scoreColor, LegendRow } from '../../components/teacher/charts'
+import { BRAND, ChartTip, axisStyle, scoreColor, scoreInk, LegendRow } from '../../components/teacher/charts'
 import { summaryFor } from '../../components/teacher/insightSummaries'
 import { RETEACH_PLANS, GENERIC_RETEACH } from '../../data/teacherIdeas'
 
@@ -170,7 +170,7 @@ export default function Insights() {
             {insights.topicAvg.map((t) => (
               <div key={t.id} className="flex items-center justify-between text-sm rounded-xl bg-cloud px-3 py-2">
                 <span className="font-semibold text-charcoal truncate">{t.name}</span>
-                <span className="flex items-center gap-2 shrink-0"><span className="text-xs text-charcoal-400">{t.questions} q</span><span className="font-bold" style={{ color: scoreColor(t.avg) }}>{t.avg || '—'}%</span></span>
+                <span className="flex items-center gap-2 shrink-0"><span className="text-xs text-charcoal-400">{t.questions} q</span><span className="font-bold" style={{ color: scoreInk(t.avg) }}>{t.avg || '—'}%</span></span>
               </div>
             ))}
           </div>

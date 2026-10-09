@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Zap, Stamp, Flame, Compass, ArrowRight, GitBranch, Trophy, CalendarDays, Clock, Sigma, Feather, Atom, Brain } from 'lucide-react'
-import { PageTitle, Card, StatTile, StatusPill, ProgressBar, ScoreBar, Button, Pill, SectionHeader } from '../../components/ui'
+import { PageTitle, Card, StatTile, StatusPill, ProgressBar, ScoreBar, scoreTextClass, Button, Pill, SectionHeader } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
 import { studentOverview, studentBadges, attendanceSummary, leaderboard, courseById, CURRENT_MONTH, TODAY } from '../../lib/selectors'
@@ -97,7 +97,7 @@ export default function Home() {
                         <div className="font-semibold text-charcoal truncate">{t.name}</div>
                         <div className="text-xs text-charcoal-400 truncate">{course.subject} · {t.lessonTitle}</div>
                       </div>
-                      <span className="font-extrabold text-danger ml-3">{t.score}%</span>
+                      <span className={`font-extrabold ml-3 ${scoreTextClass(t.score)}`}>{t.score}%</span>
                     </div>
                     <ScoreBar score={t.score} />
                   </div>

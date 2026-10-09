@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Wand2, FileSearch, CalendarCheck, Stamp, MessageCircleQuestion, AlertTriangle, Sparkles } from 'lucide-react'
-import { Card, Button, Pill, StatusPill, Avatar, ScoreBar, StatTile, SectionHeader, Callout } from '../ui'
+import { Card, Button, Pill, StatusPill, Avatar, ScoreBar, scoreTextClass, StatTile, SectionHeader, Callout } from '../ui'
 import { studentOverview, attendanceSummary, studentBadges, recognitionPatterns, lessonById, courseById } from '../../lib/selectors'
 import { fmtTime } from '../../lib/utils'
 import { computeFlags } from './flags'
@@ -80,7 +80,7 @@ export default function StudentDetail({ db, student }) {
             <div className="space-y-3">
               {ov.weakTopics.slice(0, 6).map((t) => (
                 <div key={`${t.lessonId}-${t.id}`}>
-                  <div className="flex items-center justify-between text-sm mb-1"><span className="font-semibold text-charcoal">{t.name} <span className="text-charcoal-400 font-normal">· {courseById(db, t.courseId)?.subject}</span></span><span className="font-bold text-danger">{t.score}%</span></div>
+                  <div className="flex items-center justify-between text-sm mb-1"><span className="font-semibold text-charcoal">{t.name} <span className="text-charcoal-400 font-normal">· {courseById(db, t.courseId)?.subject}</span></span><span className={`font-bold ${scoreTextClass(t.score)}`}>{t.score}%</span></div>
                   <ScoreBar score={t.score} />
                 </div>
               ))}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Instagram, Twitter, Link2, Check, Stamp } from 'lucide-react'
-import { Modal, Button, Pill, Avatar, BoltMark } from '../ui'
+import { Modal, Button, Pill, Avatar } from '../ui'
 import { StampSeal } from './Stamp'
 import { SCHOOL } from '../../data/seed'
 
@@ -21,7 +21,7 @@ export default function ShareModal({ open, onClose, profile, earned }) {
     <Modal open={open} onClose={onClose} title="Share your passport">
       <div className="rounded-3xl bg-charcoal text-white p-6 bolt-pattern-dark relative overflow-hidden">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2"><BoltMark size={28} dark /><span className="font-extrabold">BOLT<span className="text-mango">.</span></span></div>
+          <div className="flex items-center gap-2"><span className="font-extrabold text-lg">BOLT<span className="text-mango">.</span></span></div>
           <div className="text-[10px] tracking-[0.3em] text-mango font-bold">LEARNING PASSPORT</div>
         </div>
         <div className="flex items-center gap-4 mt-5">

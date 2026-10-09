@@ -6,7 +6,7 @@ import { useData } from '../../lib/data'
 import { aiEnabled } from '../../lib/ai'
 import { generatePractice } from '../../lib/practice'
 import { studentsOf, studentOverview, courseById, lessonById, courseLessons, profileById } from '../../lib/selectors'
-import { STATUS_ORDER, STATUS_COLOR, scoreColor } from '../../components/teacher/charts'
+import { STATUS_ORDER, STATUS_COLOR, scoreColor, scoreInk } from '../../components/teacher/charts'
 import { useToast } from '../../components/teacher/Toast'
 import { cx } from '../../lib/utils'
 
@@ -123,8 +123,8 @@ export default function Practice() {
             {topics.length ? (
               <div className="grid md:grid-cols-2 gap-x-8 gap-y-3">
                 {topics.map((t) => (
-                  <div key={`${t.lessonId}-${t.id}`} className={cx('rounded-xl px-3 py-2', t.score < 60 ? 'bg-danger-soft/60' : t.score >= 80 ? 'bg-success-soft/60' : 'bg-cloud')}>
-                    <div className="flex items-center justify-between text-sm mb-1"><span className="font-semibold text-charcoal truncate">{t.name} <span className="text-charcoal-400 font-normal text-xs">· {courseById(db, t.courseId)?.subject}</span></span><span className="font-bold shrink-0" style={{ color: scoreColor(t.score) }}>{t.score}%</span></div>
+                  <div key={`${t.lessonId}-${t.id}`} className={cx('rounded-xl px-3 py-2', t.score < 30 ? 'bg-danger-soft/60' : t.score < 60 ? 'bg-caution-soft/70' : t.score >= 80 ? 'bg-success-soft/60' : 'bg-cloud')}>
+                    <div className="flex items-center justify-between text-sm mb-1"><span className="font-semibold text-charcoal truncate">{t.name} <span className="text-charcoal-400 font-normal text-xs">· {courseById(db, t.courseId)?.subject}</span></span><span className="font-bold shrink-0" style={{ color: scoreInk(t.score) }}>{t.score}%</span></div>
                     <ScoreBar score={t.score} />
                   </div>
                 ))}
