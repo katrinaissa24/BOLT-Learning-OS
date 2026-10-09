@@ -52,11 +52,11 @@ export function coachingFallback({ question, lesson, prompt, draft = '' }) {
     : wc < 40 ? 'opening' : wc > 250 ? 'ending' : 'detail'
 
   const replies = {
-    counter: `Good instinct — a reader trusts you more when you name the best case against you.\n\nBefore I offer anything: **what would a careful person who disagrees with you say first?** Write their sentence, not a weak version of it.\n\nIf it helps, here is one sentence you could insert and then answer in your own words:`,
-    thesis: `Let’s check your thesis does two jobs: it takes a position, and it hints at *why*.\n\n**Could someone reasonably disagree with your current sentence?** If not, it is a topic, not a thesis.\n\nHere is one arguable version you could borrow or sharpen:`,
-    opening: `Openings are easier once you know the ending — but you don’t need the perfect first line, you need a first line.\n\n**What is the single image or fact your reader cannot ignore?** Lead with that.\n\nOne possible opening sentence for “${prompt}”:`,
-    ending: `An ending should land on consequence, not summary.\n\n**If your reader believes you, what changes for them tomorrow?** Say that.\n\nOne closing sentence you could adapt:`,
-    detail: `This is where writing gets real: one exact detail beats three vague ones.\n\n**Which sentence in your draft could a reader see, hear or touch? Which one is still a label?** Pick a label and replace it.\n\nHere is one concrete sentence you might use:`,
+    counter: `Good instinct — a reader trusts you more when you name the best case against you.\n\nBefore I offer anything: what would a careful person who disagrees with you say first? Write their sentence, not a weak version of it.\n\nIf it helps, here is one sentence you could insert and then answer in your own words:`,
+    thesis: `Let’s check your thesis does two jobs: it takes a position, and it hints at *why*.\n\nCould someone reasonably disagree with your current sentence? If not, it is a topic, not a thesis.\n\nHere is one arguable version you could borrow or sharpen:`,
+    opening: `Openings are easier once you know the ending — but you don’t need the perfect first line, you need a first line.\n\nWhat is the single image or fact your reader cannot ignore? Lead with that.\n\nOne possible opening sentence for “${prompt}”:`,
+    ending: `An ending should land on consequence, not summary.\n\nIf your reader believes you, what changes for them tomorrow? Say that.\n\nOne closing sentence you could adapt:`,
+    detail: `This is where writing gets real: one exact detail beats three vague ones.\n\nWhich sentence in your draft could a reader see, hear or touch? Which one is still a label? Pick a label and replace it.\n\nHere is one concrete sentence you might use:`,
   }
   return { reply: replies[kind], insert: bank[kind] }
 }
