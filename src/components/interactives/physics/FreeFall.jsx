@@ -72,7 +72,7 @@ export default function FreeFall({ onResult }) {
         <rect x="60" y="20" width="110" height="280" fill={C.ink100} stroke={C.ink200} />
         {Array.from({ length: 7 }, (_, r) => [0, 1, 2].map((c) => <rect key={`${r}${c}`} x={75 + c * 30} y={34 + r * 38} width="18" height="22" rx="2" fill={r === 0 ? C.mangoSoft : '#fff'} stroke={C.ink200} />))}
         <rect x="170" y="36" width="34" height="5" fill={C.ink} />
-        <text x="212" y="42" fontSize="10" fontWeight="700" fill={C.ink400}>balcony · 45 m</text>
+        <text x="176" y="28" fontSize="10" fontWeight="700" fill={C.ink400}>balcony · 45 m</text>
         <rect x="0" y="300" width="600" height="20" fill={C.ink200} />
         {/* ruler */}
         {[0, 15, 30, 45].map((m) => <g key={m}><line x1="230" y1={sy(m)} x2="240" y2={sy(m)} stroke={C.ink300} /><text x="246" y={sy(m) + 3} fontSize="9" fill={C.ink400}>{45 - m} m</text></g>)}
