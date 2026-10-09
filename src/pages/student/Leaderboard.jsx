@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Crown, Trophy, Stamp, Zap, CalendarClock, Sigma, Feather, Atom, Medal } from 'lucide-react'
-import { PageTitle, Card, Tabs, Avatar, Pill, Callout, StatusPill } from '../../components/ui'
+import { PageTitle, Card, Tabs, Avatar, Pill, Callout, StatusPill, SuggestedTag } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
 import { leaderboard, studentBadges, profileById, courseById, CURRENT_MONTH, LAST_MONTH, TODAY } from '../../lib/selectors'
@@ -129,7 +129,7 @@ export default function Leaderboard() {
 
           {me && (
             <div className="rounded-3xl bg-charcoal text-white bolt-pattern-dark p-5 shadow-soft">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-white/60">Your position · {course.subject}</div>
+              <div className="flex items-center justify-between gap-2"><div className="text-[11px] font-semibold uppercase tracking-wide text-white/60">Gap to the podium · {course.subject}</div><SuggestedTag className="bg-mango" /></div>
               <div className="text-3xl font-extrabold mt-1">#{me.rank} <span className="text-base font-semibold text-white/60">of {rows.length}</span></div>
               <div className="text-sm text-white/80 mt-1">{me.rank <= 3 ? 'On the podium — hold it until the 31st.' : `${(rows[2].points - me.points + 1).toLocaleString()} points behind 3rd place. One checkpoint is worth ~140, a lab win 30–80.`}</div>
             </div>

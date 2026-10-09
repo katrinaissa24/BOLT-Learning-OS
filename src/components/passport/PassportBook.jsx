@@ -74,7 +74,7 @@ export function StampPage({ items, page, pages }) {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between">
         <div className="text-[10px] font-bold tracking-[0.3em] text-charcoal-400">STAMPS · PAGE {page + 1} OF {pages}</div>
-        <div className="font-hand text-mango text-lg leading-none">proof of thinking</div>
+        <div className="font-hand text-mango text-lg leading-none hidden md:block">proof of thinking</div>
       </div>
       <div className="grid grid-cols-3 gap-x-2 gap-y-3 mt-4 flex-1 content-start">
         {items.map((it, i) => <StampSlot key={it.badge.id} badge={it.badge} earned={it.earned} idx={page * PER_PAGE + i} size={104} />)}

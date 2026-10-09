@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Zap, Stamp, Flame, Compass, ArrowRight, GitBranch, Trophy, CalendarDays, Clock, Sigma, Feather, Atom, Brain } from 'lucide-react'
-import { PageTitle, Card, StatTile, StatusPill, ProgressBar, ScoreBar, Button, Pill, SectionHeader, Avatar } from '../../components/ui'
+import { PageTitle, Card, StatTile, StatusPill, ProgressBar, ScoreBar, Button, Pill, SectionHeader } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
 import { studentOverview, studentBadges, attendanceSummary, leaderboard, courseById, CURRENT_MONTH, TODAY } from '../../lib/selectors'

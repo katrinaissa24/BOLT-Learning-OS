@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Hammer, Plus, Link2, CheckCircle2, Clock, Stamp, ArrowRight } from 'lucide-react'
-import { PageTitle, Card, Button, Modal, Input, Textarea, StatusPill, SkillChip, Callout, Pill, EmptyState } from '../../components/ui'
+import { PageTitle, Card, Button, Modal, Input, Textarea, StatusPill, SkillChip, Callout, Pill, EmptyState, SuggestedTag } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
 import { courseById, profileById } from '../../lib/selectors'
@@ -75,7 +75,7 @@ export default function Projects() {
           </Callout>
           <Card>
             <div className="font-hand text-mango text-xl leading-none mb-1">from the class</div>
-            <h3 className="font-extrabold text-charcoal mb-3">Validated showcase</h3>
+            <h3 className="font-extrabold text-charcoal mb-3 flex items-center gap-2">Validated showcase <SuggestedTag /></h3>
             <div className="space-y-3">
               {classroom.map((p) => {
                 const owner = profileById(db, p.student_id)

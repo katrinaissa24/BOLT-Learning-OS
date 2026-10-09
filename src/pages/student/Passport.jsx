@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Share2, Hammer, Mic, ShieldCheck, ArrowRight, Stamp } from 'lucide-react'
-import { PageTitle, Card, Button, Pill, StatusPill, SkillChip, SectionHeader, StatTile } from '../../components/ui'
+import { PageTitle, Card, Button, Pill, StatusPill, SkillChip, SectionHeader, StatTile, SuggestedTag } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
 import { studentBadges, courseById, profileById } from '../../lib/selectors'
@@ -70,7 +70,7 @@ export default function Passport() {
               <div>
                 <p className="text-sm text-charcoal-400">No oral defense yet. Pick any completed checkpoint, explain your solution to Ms. Haddad and answer her follow-ups — she validates it and the <strong>Oral Defender</strong> stamp lands here.</p>
                 <div className="mt-4 rounded-2xl bg-cloud p-4 text-sm">
-                  <div className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-400 mb-1">Good candidates</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-400 mb-1 flex items-center gap-2">Good candidates <SuggestedTag /></div>
                   <ul className="space-y-1 text-charcoal">
                     <li className="flex items-center gap-2"><ArrowRight size={13} className="text-mango" /> Derivative Formulas Through Geometry — 88% on the power rule</li>
                     <li className="flex items-center gap-2"><ArrowRight size={13} className="text-mango" /> Rhetoric: Ethos, Logos, Pathos — defend your exams essay</li>

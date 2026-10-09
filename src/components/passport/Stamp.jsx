@@ -19,7 +19,7 @@ export function StampSeal({ badge, earnedAt, size = 112, rotate = -6, idx = 0 })
       <defs>
         <filter id={id} x="-10%" y="-10%" width="120%" height="120%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed={idx + 3} result="noise" />
-          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0.15" result="alpha" />
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0.45" result="alpha" />
           <feComposite in="SourceGraphic" in2="alpha" operator="in" />
         </filter>
         <path id={`arc-${id}`} d="M 60 60 m -42 0 a 42 42 0 1 1 84 0" />
