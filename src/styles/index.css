@@ -93,3 +93,26 @@ input[type="range"] { accent-color: var(--color-mango); }
   background-image: radial-gradient(rgba(53,59,72,0.06) 0.6px, transparent 0.6px);
   background-size: 6px 6px;
 }
+
+/* Landing classroom scene */
+.cr-bob { animation: crBob 3.6s ease-in-out infinite; }
+.cr-shadow { transform-box: fill-box; transform-origin: center; animation: crShadow 3.6s ease-in-out infinite; }
+.cr-flame { transform-box: fill-box; transform-origin: top center; animation: crFlame .18s ease-in-out infinite alternate; }
+.cr-blink { transform-box: fill-box; transform-origin: center; animation: crBlink 4.2s infinite; }
+.cr-pulse { animation: crPulse 1.6s ease-in-out infinite; }
+.cr-beam { animation: crBeam 3.6s ease-in-out infinite; }
+.cr-point { transform-box: view-box; transform-origin: 182px 310px; animation: crPoint 3.2s ease-in-out infinite; }
+.cr-wave { transform-box: view-box; transform-origin: 594px 540px; animation: crWave 1.4s ease-in-out infinite; }
+.cr-tick { transform-box: view-box; transform-origin: 0 0; animation: crTick 12s linear infinite; }
+@keyframes crBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes crShadow { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.8); opacity: .6; } }
+@keyframes crFlame { from { transform: scaleY(.75); opacity: .8; } to { transform: scaleY(1.1); opacity: 1; } }
+@keyframes crBlink { 0%,92%,100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes crPulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes crBeam { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes crPoint { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-5deg); } }
+@keyframes crWave { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(8deg); } }
+@keyframes crTick { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .cr-bob, .cr-shadow, .cr-flame, .cr-blink, .cr-pulse, .cr-beam, .cr-point, .cr-wave, .cr-tick { animation: none; }
+}
