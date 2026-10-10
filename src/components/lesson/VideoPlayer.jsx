@@ -136,7 +136,7 @@ function YouTubeLesson({ lesson, currentTime, onTime, active = true }) {
           <span className="text-xs text-charcoal-400">click a line to jump · now at <span className="font-bold text-charcoal tabular-nums">{fmtTime(currentTime)}</span></span>
         </div>
         {lesson.video_title && <div className="text-xs text-charcoal-400 -mt-1 mb-2 truncate">▶ {lesson.video_title}</div>}
-        {!lesson.transcript_loading && transcript.length === 0 && <div className="text-sm text-charcoal-400 ml-2">No captions available for this video.</div>}
+        {!lesson.transcript_loading && transcript.length === 0 && <div className="text-sm text-charcoal-400 ml-2">Couldn’t load this video’s captions yet. Open the lesson once with `npm run dev` to save them.</div>}
         <ol className="relative border-l-2 border-charcoal-100 ml-2 space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
           {transcript.map((seg, i) => {
             const active = i === activeIdx

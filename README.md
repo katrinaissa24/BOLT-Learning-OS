@@ -47,6 +47,8 @@ Set `ANTHROPIC_API_KEY` (server-side, e.g. a Vercel Secret) to turn on live AI. 
 
 ### Video transcripts
 
+**Free and automatic:** open each lesson once while running `npm run dev`. The dev server fetches the captions from your own internet connection (which YouTube doesn't block) and saves them to `src/data/transcripts.json`. Commit that file and every deployed lesson shows the real transcript, with no API and no cost.
+
 `api/transcript.js` pulls a video's captions from YouTube on demand (cached for a day), so the tutor gets the real transcript with timestamps. If YouTube blocks the server, bake them in from any machine with normal internet:
 
 ```

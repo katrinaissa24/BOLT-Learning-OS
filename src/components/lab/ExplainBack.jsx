@@ -31,6 +31,23 @@ function assessLocally(answers, bank) {
   return { level, evidence, coverage }
 }
 
+/** Offline follow-up: react to what the student wrote (right / partly / missing), then ask the next question. */
+function localFollowup(text, bank, stage, lesson) {
+  const lower = text.toLowerCase()
+  const hits = bank.keywords.filter((k) => lower.includes(k.toLowerCase()))
+  const words = text.trim().split(/\s+/).filter(Boolean).length
+  const reason = /\b(because|since|so|which means|therefore)\b/.test(lower)
+  const offTopic = /integral|integrat/.test(lower) && !/integral|integrat/i.test(`${lesson.title} ${bank.question}`)
+  const quote = `“${quoteFrom(text, 60)}”`
+  let react
+  if (offTopic) react = `Careful: you wrote ${quote}, but this is about derivatives, not integrals. Mixing the two up is common, so keep them separate.`
+  else if (hits.length >= 3 && reason) react = `Good: ${quote} uses the key ideas (${hits.slice(0, 3).join(', ')}) and gives a reason.`
+  else if (hits.length >= 1) react = `Partly there: ${quote} mentions ${hits.slice(0, 2).join(' and ')}, but it states the rule more than it explains why it works.`
+  else react = `Not quite yet: ${quote} ${words < 8 ? 'is very short' : 'repeats the rule'} without the idea behind it. I'm looking for the reasoning, not the formula.`
+  const hint = bank.modelPoints?.[stage] && !/^Explains /.test(bank.modelPoints[stage]) ? `\n\nHint: ${bank.modelPoints[stage].charAt(0).toLowerCase()}${bank.modelPoints[stage].slice(1)}.` : ''
+  return `${react}${hint}\n\n${bank.followups[stage]}`
+}
+
 export default function ExplainBack({ profile, preselect }) {
   const { db, awardPoints, awardBadge } = useData()
   const [lessonId, setLessonId] = useState(preselect && db.lessons.some((l) => l.id === preselect) ? preselect : 'math-12-l4')
@@ -66,9 +83,10 @@ export default function ExplainBack({ profile, preselect }) {
     setBusy(true)
     await think(800)
     if (stage < 3) {
-      const fb = bank.followups[stage]
-      const sys = `You are BOLT, probing a Grade 12 student's understanding of "${lesson.title}" (${course.title}). Stage ${stage + 1}: ${['ask WHY their explanation works', 'ask WHAT IF a number or condition changed', 'give a NEW SCENARIO to apply the idea'][stage]}. One question, max 2 sentences, reference something they wrote.`
-      const q = await ask({ system: sys, messages: [{ role: 'user', content: `Question asked: ${turns[turns.length - 1]?.text}\nStudent answered: ${text}` }], fallback: fb, maxTokens: 160 })
+      const fb = () => localFollowup(text, bank, stage, lesson)
+      const sys = `You are BOLT, probing a Grade 12 student's understanding of "${lesson.title}" (${course.title}). Stage ${stage + 1}: ${['ask WHY their explanation works', 'ask WHAT IF a number or condition changed', 'give a NEW SCENARIO to apply the idea'][stage]}. 
+Reply in 2–4 short sentences: (1) say clearly whether what they wrote is correct, partly correct or incorrect (point out any mistake, e.g. confusing derivative and integral), quoting a few of their words; (2) explain what kind of answer you want (e.g. the reasoning behind a rule, not the rule itself); (3) end with ONE clear question. Do not give the full answer away. Always finish your sentences.`
+      const q = await ask({ system: sys, messages: [{ role: 'user', content: `Question asked: ${turns[turns.length - 1]?.text}\nStudent answered: ${text}` }], fallback: fb, maxTokens: 400 })
       setTurns((t) => [...t, { who: 'ai', label: STAGES[stage + 1], text: q }])
       setStage(stage + 1)
       setBusy(false)
