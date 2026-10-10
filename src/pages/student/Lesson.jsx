@@ -13,7 +13,7 @@ import CheckpointQuestion from '../../components/lesson/CheckpointQuestion'
 import PracticeBranch from '../../components/lesson/PracticeBranch'
 import Celebration from '../../components/lesson/Celebration'
 import { cx } from '../../lib/utils'
-import { useYouTubeTranscript } from '../../lib/useYouTubeTranscript'
+import { useLessonTranscript } from '../../lib/transcript'
 
 /**
  * A lesson is a deck of slides that fits the screen: Watch → Explore → Prove it (→ Practice when
@@ -22,10 +22,10 @@ import { useYouTubeTranscript } from '../../lib/useYouTubeTranscript'
  */
 export default function Lesson() {
   const { courseId, lessonId } = useParams()
-  const { db, awardPoints, upsertLessonProgress, awardBadge, update } = useData()
+  const { db, awardPoints, upsertLessonProgress, awardBadge } = useData()
   const { profile } = useAuth()
 
-  const { lesson, status: transcriptStatus } = useYouTubeTranscript(lessonById(db, lessonId), update)
+  const lesson = lessonById(db, lessonId)
   const course = courseById(db, courseId)
   const lessons = useMemo(() => courseLessons(db, courseId), [db, courseId])
   const idx = lessons.findIndex((l) => l.id === lessonId)
@@ -33,6 +33,16 @@ export default function Lesson() {
   const nextLesson = idx >= 0 && idx < lessons.length - 1 ? lessons[idx + 1] : null
   const progress = profile ? progressFor(db, profile.id, lessonId) : null
   const activity = activityFor(lessonId)
+  const tr = useLessonTranscript(lesson)
+  // the lesson as the video player and tutor see it: real transcript (with timestamps) when we could fetch one
+  const view = useMemo(() => lesson && ({
+    ...lesson,
+    transcript: tr.segments,
+    transcript_source: tr.source,
+    transcript_loading: !!tr.loading,
+    video_title: tr.title,
+    duration_min: tr.duration ? Math.ceil(tr.duration / 60) : lesson.duration_min,
+  }), [lesson, tr])
 
   const [currentTime, setCurrentTime] = useState(0)
   const [result, setResult] = useState(null)
@@ -47,13 +57,13 @@ export default function Lesson() {
 
   const steps = useMemo(() => {
     const list = [
-      { key: 'watch', label: 'Watch', title: 'Watch with your tutor', icon: PlayCircle },
+      lesson?.youtube_id ? { key: 'watch', label: 'Watch', title: 'Watch with your tutor', icon: PlayCircle } : { key: 'watch', label: 'Learn', title: 'Read with your tutor', icon: BookOpen },
       { key: 'explore', label: 'Explore', title: 'Play with the idea', icon: Puzzle },
     ]
     if (activity?.question) list.push({ key: 'prove', label: 'Prove it', title: 'Checkpoint question', icon: Flag })
     if (branch) list.push({ key: 'practice', label: 'Practice', title: 'Extra practice', icon: GitBranch })
     return list
-  }, [activity, branch])
+  }, [activity, branch, lesson?.youtube_id])
 
   const last = steps.length - 1
   const go = useCallback((i) => setSlide((s) => Math.max(0, Math.min(last, typeof i === 'function' ? i(s) : i))), [last])
@@ -104,8 +114,8 @@ export default function Lesson() {
     if (key === 'watch') {
       return (
         <div className="h-full grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5">
-          <div className="min-h-[420px] lg:min-h-0"><VideoPlayer lesson={lesson} transcriptStatus={transcriptStatus} currentTime={currentTime} onTime={onTime} active={active} /></div>
-          <div className="h-[520px] lg:h-full min-h-0"><TutorChat lesson={lesson} course={course} currentTime={currentTime} studentId={profile.id} /></div>
+          <div className="min-h-[420px] lg:min-h-0"><VideoPlayer lesson={view} currentTime={currentTime} onTime={onTime} active={active} /></div>
+          <div className="h-[520px] lg:h-full min-h-0"><TutorChat lesson={view} course={course} currentTime={currentTime} studentId={profile.id} /></div>
         </div>
       )
     }

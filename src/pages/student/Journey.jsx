@@ -91,7 +91,7 @@ export default function Journey() {
           </div>
         </div>
         <div className="min-h-[420px]">
-          <CheckpointPanel node={selected} course={course} onClose={() => setSelectedId(null)} onBranch={(n) => setBranchNode(n)} lessonLink={selected ? `/student/courses/${courseId}/lessons/${selected.lesson.id}` : '#'} />
+          <CheckpointPanel node={selected} course={course} total={nodes.length} onClose={() => setSelectedId(null)} onBranch={(n) => setBranchNode(n)} lessonLink={selected ? `/student/courses/${courseId}/lessons/${selected.lesson.id}` : '#'} />
         </div>
       </div>
 

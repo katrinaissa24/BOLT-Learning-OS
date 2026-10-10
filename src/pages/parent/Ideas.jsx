@@ -1,10 +1,6 @@
 import { MessageSquare, Utensils, CalendarClock, Target, Languages, GraduationCap, BellRing, Star, Check } from 'lucide-react'
 import { PageTitle, Card, SuggestedTag, Pill, Callout } from '../../components/ui'
-import { useAuth } from '../../lib/auth'
-import { useData } from '../../lib/data'
-import { profileById } from '../../lib/selectors'
 import { parentIdeas } from '../../data/parentIdeas'
-import DinnerQuestions from '../../components/parent/DinnerQuestions'
 import { cx } from '../../lib/utils'
 
 const ICONS = { 'message-square': MessageSquare, utensils: Utensils, 'calendar-clock': CalendarClock, target: Target, languages: Languages, 'graduation-cap': GraduationCap, 'bell-ring': BellRing }
@@ -43,19 +39,13 @@ function Mock({ mock }) {
 }
 
 export default function Ideas() {
-  const { profile } = useAuth()
-  const { db } = useData()
-  const child = profileById(db, profile.child_id)
-  const first = child.full_name.split(' ')[0]
-  const stubs = parentIdeas.filter((i) => !i.built)
+  const stubs = parentIdeas
 
   return (
     <div>
-      <PageTitle eyebrow="proposals, not promises" title="Suggested ideas" subtitle="Parent features we think belong in BOLT. Everything tagged “Suggested” uses sample data and is waiting for your yes or no. One of them — dinner-table questions — is built for real below." />
+      <PageTitle eyebrow="proposals, not promises" title="Suggested ideas" subtitle="Parent features we think belong in BOLT. Everything tagged “Suggested” uses sample data and is waiting for your yes or no." />
 
-      <DinnerQuestions db={db} childId={profile.child_id} firstName={first} />
-
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5 mt-8">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5 mt-2">
         {stubs.map((idea) => {
           const Icon = ICONS[idea.icon] || MessageSquare
           return (
@@ -75,7 +65,7 @@ export default function Ideas() {
       </div>
 
       <Callout tone="mango" className="mt-8" title="How to read this page">
-        Built features use {first}’s real data. Stubs show the shape of the idea with made-up numbers so you can decide whether it is worth building. Nothing here sends a real message or charges anything.
+        Every card here is a stub: it shows the shape of the idea with made-up numbers so you can decide whether it is worth building. Nothing here sends a real message or charges anything.
       </Callout>
     </div>
   )

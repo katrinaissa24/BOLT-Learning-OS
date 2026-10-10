@@ -92,7 +92,7 @@ function TrackerGrid({ db }) {
                     <td key={c.id} className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <StatusPill status={s.status} />
-                        <span className="font-semibold text-charcoal tabular-nums">{s.completed}/7</span>
+                        <span className="font-semibold text-charcoal tabular-nums">{s.completed}/{s.total}</span>
                         <span className={cx('rounded-lg px-1.5 py-0.5 text-xs font-bold tabular-nums', s.completed ? scoreTint(s.avgScore) : 'bg-charcoal-100 text-charcoal-400')}>{s.completed ? `${s.avgScore}%` : '—'}</span>
                       </div>
                     </td>

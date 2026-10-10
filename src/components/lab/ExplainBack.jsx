@@ -98,7 +98,7 @@ export default function ExplainBack({ profile, preselect }) {
   const reset = () => { setStage(-1); setTurns([]); setAnswers([]); setResult(null); setDraft('') }
 
   return (
-    <GameShell title="Explain Back" eyebrow="teach it to prove it" icon={MessageCircle} badge={badge} course={course} progress={`${deepCount} deep`}>
+    <GameShell ai title="Explain Back" eyebrow="teach it to prove it" icon={MessageCircle} badge={badge} course={course} progress={`${deepCount} deep`}>
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
         <Card padded={false} className="flex flex-col min-h-[540px]">
           {stage === -1 ? (

@@ -211,6 +211,3 @@ end $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute procedure public.handle_new_user();
-
--- Real YouTube captions are fetched automatically (/api/transcript) and saved back here.
-alter table public.lessons add column if not exists transcript_source text;

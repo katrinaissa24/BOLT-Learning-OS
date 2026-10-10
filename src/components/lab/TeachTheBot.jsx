@@ -48,7 +48,7 @@ export default function TeachTheBot({ profile }) {
 
   if (!session) {
     return (
-      <GameShell title="Teach the Bot" eyebrow="ziko needs you" icon={Bot} badge={badge} progress={`${done}/3 sessions`}>
+      <GameShell ai title="Teach the Bot" eyebrow="ziko needs you" icon={Bot} badge={badge} progress={`${done}/3 sessions`}>
         <div className="grid lg:grid-cols-[1fr_300px] gap-6">
           <div className="grid sm:grid-cols-2 gap-3">
             {ZIKO_SESSIONS.map((s) => {
@@ -73,7 +73,7 @@ export default function TeachTheBot({ profile }) {
   }
 
   return (
-    <GameShell title="Teach the Bot" eyebrow="ziko needs you" icon={Bot} badge={badge} course={course} progress={`${done}/3 sessions`}>
+    <GameShell ai title="Teach the Bot" eyebrow="ziko needs you" icon={Bot} badge={badge} course={course} progress={`${done}/3 sessions`}>
       <div className="grid lg:grid-cols-[1fr_320px] gap-5">
         <Card>
           <Bubble who="ai" name="Ziko">{session.intro}</Bubble>

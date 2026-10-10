@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, BookOpen, Trophy, Stamp, CalendarDays, Brain, Hammer, Users, BarChart3, FileSearch, Wand2, Award, HeartHandshake, Bell, LogOut, Menu, X, Zap, Sparkles, Database, WifiOff } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
-import { aiEnabled } from '../../lib/ai'
+import { checkAI } from '../../lib/ai'
 import { Logo, Avatar, Pill } from '../ui'
 import { cx } from '../../lib/utils'
 import { studentOverview } from '../../lib/selectors'
@@ -21,7 +21,7 @@ const NAV = {
   teacher: [
     { to: '/teacher', label: 'Overview', icon: LayoutDashboard, end: true },
     { to: '/teacher/tracker', label: 'Progress Tracker', icon: Users },
-    { to: '/teacher/insights', label: 'Lesson Insights', icon: BarChart3 },
+    { to: '/teacher/insights', label: 'Insights', icon: BarChart3 },
     { to: '/teacher/review', label: 'Process Replay', icon: FileSearch },
     { to: '/teacher/practice', label: 'Extra Practice', icon: Wand2 },
     { to: '/teacher/recognition', label: 'Recognition', icon: Award },
@@ -41,6 +41,8 @@ export default function AppShell({ role }) {
   const { db } = useData()
   const nav = useNavigate()
   const [open, setOpen] = useState(false)
+  const [live, setLive] = useState(null) // null = checking
+  useEffect(() => { checkAI().then(setLive) }, [])
   const items = NAV[role] || []
   const points = role === 'student' && profile ? studentOverview(db, profile.id).totalPoints : null
 
@@ -60,7 +62,7 @@ export default function AppShell({ role }) {
           {supabaseConfigured && !isLocalMode ? <><Database size={12} /> Supabase connected</> : <><WifiOff size={12} /> Local demo mode</>}
         </div>
         <div className="flex items-center gap-2 text-[11px] text-white/60">
-          <Zap size={12} className={aiEnabled ? 'text-mango' : ''} /> {aiEnabled ? 'Live AI enabled' : 'AI in demo mode (add API key)'}
+          <Zap size={12} className={live ? 'text-mango' : ''} /> {live ? 'Live AI enabled' : live === null ? 'Checking AI…' : 'AI in demo mode (add API key)'}
         </div>
       </div>
     </aside>

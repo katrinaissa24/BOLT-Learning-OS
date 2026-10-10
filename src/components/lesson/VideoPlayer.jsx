@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { Youtube, ListVideo, WifiOff } from 'lucide-react'
+import { Youtube, ListVideo, WifiOff, BookOpen, Target } from 'lucide-react'
 import { fmtTime, cx } from '../../lib/utils'
 
-/** Loads the YouTube IFrame API once. Resolves with window.YT or rejects when blocked / slow. */
-function loadYT(timeoutMs = 4000) {
-  return new Promise((resolve, reject) => {
-    if (window.YT?.Player) return resolve(window.YT)
+/** Loads the YouTube IFrame API once (shared promise). Resolves with window.YT or rejects when blocked / slow. */
+let ytPromise = null
+export function loadYT(timeoutMs = 6000) {
+  if (window.YT?.Player) return Promise.resolve(window.YT)
+  if (ytPromise) return ytPromise
+  ytPromise = new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('yt-timeout')), timeoutMs)
     const prev = window.onYouTubeIframeAPIReady
     window.onYouTubeIframeAPIReady = () => { clearTimeout(timer); prev?.(); resolve(window.YT) }
@@ -15,7 +17,8 @@ function loadYT(timeoutMs = 4000) {
       s.onerror = () => { clearTimeout(timer); reject(new Error('yt-blocked')) }
       document.head.appendChild(s)
     }
-  })
+  }).catch((err) => { ytPromise = null; throw err })
+  return ytPromise
 }
 
 /**
@@ -23,7 +26,32 @@ function loadYT(timeoutMs = 4000) {
  * Reports the current playback time via onTime(seconds). Falls back to a plain iframe plus a
  * "where are you in the video" slider when the IFrame API is unavailable — never throws.
  */
-export default function VideoPlayer({ lesson, currentTime, onTime, active = true, transcriptStatus }) {
+export default function VideoPlayer(props) {
+  return props.lesson.youtube_id ? <YouTubeLesson {...props} /> : <LessonNotes lesson={props.lesson} />
+}
+
+/** Lessons without a video get a reading card instead of an empty black player. */
+function LessonNotes({ lesson }) {
+  return (
+    <div className="card flex flex-col h-full min-h-0 overflow-y-auto p-6">
+      <div className="flex items-center gap-2 text-sm font-bold text-charcoal mb-3"><BookOpen size={16} className="text-mango" /> Lesson notes</div>
+      <p className="text-lg text-charcoal leading-relaxed">{lesson.summary}</p>
+      <div className="mt-5 text-[11px] uppercase tracking-wide font-bold text-charcoal-400 mb-2">What you will be able to do</div>
+      <ul className="space-y-2">
+        {lesson.topics.map((t) => <li key={t.id} className="flex items-start gap-2 text-sm text-charcoal"><Target size={15} className="text-mango mt-0.5 shrink-0" /> {t.name}</li>)}
+      </ul>
+      {lesson.transcript?.length > 0 && (
+        <>
+          <div className="mt-5 text-[11px] uppercase tracking-wide font-bold text-charcoal-400 mb-2">Key ideas, in order</div>
+          <ol className="space-y-2 list-decimal pl-5 text-sm text-charcoal-500">{lesson.transcript.map((seg) => <li key={seg.t}>{seg.text}</li>)}</ol>
+        </>
+      )}
+      <div className="mt-auto pt-5 text-xs text-charcoal-400">No video for this checkpoint. Ask the tutor anything about these notes, then try the Explore slide.</div>
+    </div>
+  )
+}
+
+function YouTubeLesson({ lesson, currentTime, onTime, active = true }) {
   const [mode, setMode] = useState('loading') // loading | api | fallback
   const hostRef = useRef(null)
   const playerRef = useRef(null)
@@ -86,6 +114,7 @@ export default function VideoPlayer({ lesson, currentTime, onTime, active = true
         {mode === 'fallback' && (
           <iframe title={lesson.title} className="absolute inset-0 w-full h-full" src={`https://www.youtube-nocookie.com/embed/${lesson.youtube_id}?rel=0&modestbranding=1`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
         )}
+        {mode === 'loading' && <img src={`https://i.ytimg.com/vi/${lesson.youtube_id}/hqdefault.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none" />}
         {mode === 'loading' && <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70 text-sm pointer-events-none"><Youtube size={28} className="text-mango" /> Loading video…</div>}
       </div>
 
@@ -101,11 +130,14 @@ export default function VideoPlayer({ lesson, currentTime, onTime, active = true
 
       <div className="p-5 flex-1 min-h-0 flex flex-col">
         <div className="flex items-center justify-between mb-3 shrink-0">
-          <div className="flex items-center gap-2 text-sm font-bold text-charcoal"><ListVideo size={16} className="text-mango" /> Transcript timeline</div>
-          <span className="text-xs text-charcoal-400">{transcriptStatus === 'ready' ? 'YouTube captions · ' : ''}click a line to jump · now at <span className="font-bold text-charcoal tabular-nums">{fmtTime(currentTime)}</span></span>
+          <div className="flex items-center gap-2 text-sm font-bold text-charcoal min-w-0"><ListVideo size={16} className="text-mango shrink-0" /> Transcript timeline
+            {lesson.transcript_loading && <span className="text-[11px] font-semibold text-charcoal-400">· fetching transcript…</span>}
+          </div>
+          <span className="text-xs text-charcoal-400">click a line to jump · now at <span className="font-bold text-charcoal tabular-nums">{fmtTime(currentTime)}</span></span>
         </div>
+        {lesson.video_title && <div className="text-xs text-charcoal-400 -mt-1 mb-2 truncate">▶ {lesson.video_title}</div>}
+        {!lesson.transcript_loading && transcript.length === 0 && <div className="text-sm text-charcoal-400 ml-2">No captions available for this video.</div>}
         <ol className="relative border-l-2 border-charcoal-100 ml-2 space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
-          {transcriptStatus === 'loading' && <li className="pl-4 py-2 text-sm text-charcoal-400">Fetching the video's captions…</li>}
           {transcript.map((seg, i) => {
             const active = i === activeIdx
             return (
