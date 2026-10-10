@@ -1,0 +1,24 @@
+# Downloads real YouTube captions for every lesson into src/data/transcripts.json and commits them.
+# Runs when lessons change, weekly, or by hand (Actions → Fetch transcripts → Run workflow). Free, no API key.
+name: Fetch transcripts
+on:
+  workflow_dispatch:
+  schedule: [{ cron: '17 3 * * 1' }]
+  push:
+    paths: ['src/data/seed.js', 'api/_lib/youtube.js', '.github/workflows/transcripts.yml', 'scripts/fetch-transcripts.mjs']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm run fetch:transcripts
+      - name: Commit transcripts
+        run: |
+          git config user.name "bolt-transcripts-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/data/transcripts.json
+          git diff --cached --quiet && echo "no changes" || (git commit -m "Update lesson transcripts [skip ci]" && git push)
