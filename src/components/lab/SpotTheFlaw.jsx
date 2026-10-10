@@ -4,7 +4,7 @@ import { Card, Button, Pill, Callout } from '../ui'
 import { useData } from '../../lib/data'
 import { courseById } from '../../lib/selectors'
 import { FLAW_CASES } from '../../data/lab'
-import { GameShell, Bubble, ResultCard, think, bumpCounter, readCounters } from './shared'
+import { GameShell, Bubble, ResultCard, CoachChat, think, bumpCounter, readCounters } from './shared'
 import { cx } from '../../lib/utils'
 
 const WINS_NEEDED = 5
@@ -94,7 +94,11 @@ export default function SpotTheFlaw({ profile }) {
             <ResultCard eyebrow={result.win ? 'critical eye' : 'keep looking'} title={result.win ? 'You caught every flaw' : 'Some flaws slipped through'} points={result.pts} badgeEarned={result.badgeNew ? 'Critical Eye' : null} tone={result.win ? 'mango' : 'light'} onReplay={() => { setKase(null); setPicked([]); setResult(null) }} replayLabel="Next case">
               {result.win ? (result.count >= WINS_NEEDED ? `${result.count} wins — Critical Eye territory.` : `Win ${result.count} of ${WINS_NEEDED}.`) : 'A win needs every planted error and at most one false alarm.'}
             </ResultCard>
-          ) : (
+          ) : null}
+          {result && (
+            <CoachChat key={kase.id} name={profile.full_name.split(' ')[0]} context={`Game: Spot the Flaw — the student read a confident AI answer ("${kase.title}", ${kase.kind}) and flagged the lines they thought were wrong.\nLines:\n${kase.lines.map((l, i) => `${i + 1}. ${l.text}${l.flawed ? ` [FLAWED: ${l.why}]` : ''}${picked.includes(i) ? ' [student flagged]' : ''}`).join('\n')}\nResult: found ${result.hits}/${result.total} flaws with ${result.falses} false alarm(s).`} />
+          )}
+          {!result && (
             <Callout tone="mango" icon={Search} title="Rules">Find every planted error with at most one false alarm to win the round. Confidence is not a signal — check each step.</Callout>
           )}
         </div>

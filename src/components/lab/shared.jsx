@@ -1,10 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Trophy, Zap, Bot } from 'lucide-react'
-import { Pill, Button, AITag } from '../ui'
+import { ArrowLeft, Trophy, Zap, Bot, Send } from 'lucide-react'
+import { Pill, Button, AITag, Card, Textarea } from '../ui'
 import { badgeIcon } from '../passport/icons'
 import { cx } from '../../lib/utils'
-import { aiEnabled } from '../../lib/ai'
+import { aiEnabled, ask } from '../../lib/ai'
 
 export const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 /** Simulated "thinking" delay only when AI is off (AI calls carry their own latency). */
@@ -97,4 +98,63 @@ export function quoteFrom(text, max = 50) {
   const sentences = clean.split(/(?<=[.!?])\s+/).filter((s) => s.length > 15)
   const pick = (sentences.sort((a, b) => b.length - a.length)[0] || clean)
   return pick.length > max ? pick.slice(0, max).replace(/\s\S*$/, '') + '…' : pick.replace(/[.!?]$/, '')
+}
+
+const COACH_RULES = `Every reply has TWO parts, 2–5 short sentences total:
+(1) A personalised response to what the student actually did or wrote — quote or name their specific choices. Say what was strong and name one specific gap. If they say they don't know or wrote very little, give a small concrete example or the key idea in plain words instead of repeating the question.
+(2) End with ONE follow-up question that asks them to DO something concrete — prefer "Give me an example of …", "Show me …", "Rewrite … so that …", "What would you do if …". Never just "Explain …".
+Don't lecture. Always finish your sentences.`
+
+/**
+ * AI coaching thread shown after a game: opens with a personalised debrief + follow-up question,
+ * then answers every student reply with a personalised response + a new follow-up question.
+ *   context: what the game was and what the student did (plain text for the model)
+ */
+export function CoachChat({ context, name = 'You', title = 'BOLT coach' }) {
+  const [turns, setTurns] = useState([])
+  const [draft, setDraft] = useState('')
+  const [busy, setBusy] = useState(true)
+  const [error, setError] = useState(false)
+  const feedRef = useRef(null)
+  const system = `You are BOLT, coaching ${name} after a Thinking Lab activity.\n${context}\n\n${COACH_RULES}`
+
+  const OPEN = { role: 'user', content: 'Give me my personalised debrief and a follow-up question.' }
+  const open = () => {
+    setBusy(true); setError(false)
+    return ask({ system, messages: [OPEN], fallback: '', maxTokens: 450 })
+  }
+  useEffect(() => {
+    let live = true
+    open().then((text) => { if (!live) return; if (text) setTurns([{ who: 'ai', text }]); else setError(true); setBusy(false) })
+    return () => { live = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const retryOpen = async () => { const text = await open(); if (text) setTurns([{ who: 'ai', text }]); else setError(true); setBusy(false) }
+  useEffect(() => { feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight, behavior: 'smooth' }) }, [turns, busy])
+
+  const send = async () => {
+    const text = draft.trim()
+    if (!text || busy) return
+    const history = [...turns, { who: 'you', text }]
+    setTurns(history); setDraft(''); setBusy(true); setError(false)
+    const reply = await ask({ system, messages: [OPEN, ...history.map((t) => ({ role: t.who === 'ai' ? 'assistant' : 'user', content: t.text }))], fallback: '', maxTokens: 450 })
+    if (reply) setTurns((t) => [...t, { who: 'ai', text: reply }])
+    else { setTurns(turns); setDraft(text); setError(true) } // AI unreachable: no canned reply, let them retry
+    setBusy(false)
+  }
+
+  return (
+    <Card padded={false} className="flex flex-col">
+      <div className="px-5 pt-4 text-[11px] font-semibold uppercase tracking-wide text-charcoal-400 flex items-center gap-2">{title} <AITag className="text-[10px]" /></div>
+      <div ref={feedRef} className="p-5 space-y-4 max-h-[420px] overflow-y-auto">
+        {turns.map((t, i) => <Bubble key={i} who={t.who} name={t.who === 'ai' ? 'BOLT' : name}><span className="whitespace-pre-line">{t.text}</span></Bubble>)}
+        {error && !busy && <div className="rounded-xl bg-danger-soft text-charcoal text-sm p-3 flex items-center justify-between gap-3">BOLT couldn’t reach the AI just now.{turns.length === 0 && <Button size="sm" variant="ghost" onClick={retryOpen}>Retry</Button>}</div>}
+        {busy && <Typing />}
+      </div>
+      <div className="border-t border-charcoal-100 p-4">
+        <Textarea rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} disabled={busy || turns.length === 0} placeholder="Answer BOLT’s question — or say “I don’t know” and it will help." onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send() }} />
+        <div className="flex justify-end mt-2"><Button size="sm" onClick={send} disabled={busy || !draft.trim() || turns.length === 0}><Send size={14} /> Reply</Button></div>
+      </div>
+    </Card>
+  )
 }

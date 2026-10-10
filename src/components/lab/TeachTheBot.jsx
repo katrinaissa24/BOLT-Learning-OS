@@ -6,7 +6,7 @@ import { ask } from '../../lib/ai'
 import { useData } from '../../lib/data'
 import { courseById } from '../../lib/selectors'
 import { ZIKO_SESSIONS } from '../../data/lab'
-import { GameShell, Bubble, Typing, ResultCard, think, bumpCounter, readCounters } from './shared'
+import { GameShell, Bubble, Typing, ResultCard, CoachChat, think, bumpCounter, readCounters } from './shared'
 import { cx } from '../../lib/utils'
 
 export default function TeachTheBot({ profile }) {
@@ -29,7 +29,7 @@ export default function TeachTheBot({ profile }) {
     const spotted = wrong.filter((i) => flags.includes(i))
     const falseFlags = flags.filter((i) => !wrong.includes(i))
     const perfect = spotted.length === wrong.length && falseFlags.length === 0
-    const reply = await ask({ system: `You are Ziko, a friendly but confused AI classmate. The student just corrected your explanation of "${session.title}". Reply in 2 sentences: thank them, restate ONE corrected idea in your own words. Keep it light.`, messages: [{ role: 'user', content: `Student flagged sentences: ${flags.map((i) => session.sentences[i].text).join(' | ')}\nStudent's correction: ${correction}` }], fallback: perfect ? `Ohh, I see it now — ${session.sentences[wrong[0]].fix.split('.')[0]}. Thanks ${profile.full_name.split(' ')[0]}, you explained that better than the video!` : `Hmm, thanks! I think I still mixed something up — ${session.sentences[wrong.find((i) => !flags.includes(i)) ?? wrong[0]].fix.split('.')[0]}. Let me re-read my notes.`, maxTokens: 160 })
+    const reply = await ask({ system: `You are Ziko, a friendly but confused AI classmate. The student just corrected your explanation of "${session.title}". Reply in 2–3 sentences: respond personally to what they actually flagged and wrote (say if they missed a mistake or flagged a correct line, without giving the fix away), restate ONE corrected idea in your own words, then end with ONE follow-up question asking them for a concrete example (e.g. "Can you give me an example where …?"). Keep it light.`, messages: [{ role: 'user', content: `Student flagged sentences: ${flags.map((i) => session.sentences[i].text).join(' | ')}\nStudent's correction: ${correction}\nActually wrong sentences: ${wrong.map((i) => `${session.sentences[i].text} (fix: ${session.sentences[i].fix})`).join(' | ')}` }], fallback: '', maxTokens: 160 })
     const pts = 30 + spotted.length * 10 + (perfect ? 10 : 0)
     let badgeNew = false
     let count = done
@@ -101,7 +101,8 @@ export default function TeachTheBot({ profile }) {
             </div>
           )}
           {busy && <div className="mt-4"><Typing name="Ziko" /></div>}
-          {result && <div className="mt-4"><Bubble who="ai" name="Ziko" tone={result.perfect ? 'success' : undefined}>{result.reply}</Bubble></div>}
+          {result?.reply && <div className="mt-4"><Bubble who="ai" name="Ziko" tone={result.perfect ? 'success' : undefined}>{result.reply}</Bubble></div>}
+          {result && <div className="mt-4"><CoachChat key={session.id} name={profile.full_name.split(' ')[0]} context={`Game: Teach the Bot — Ziko (an AI classmate) explained "${session.title}" with planted mistakes. The student flagged lines and wrote a correction.\nZiko's lines:\n${session.sentences.map((x, i) => `${i + 1}. ${x.text}${x.wrong ? ` [WRONG — fix: ${x.fix}]` : ''}${flags.includes(i) ? ' [student flagged]' : ''}`).join('\n')}\nStudent's correction: "${correction}"\nResult: spotted ${result.spotted}/${result.total}, ${result.falseFlags} false flag(s).`} /></div>}
         </Card>
         <div className="space-y-4">
           <Card>
