@@ -4,7 +4,7 @@ import baked from '../data/transcripts.json'
 /**
  * Real video transcripts for the tutor.
  * Order: baked file (scripts/fetch-transcripts.mjs) → live /api/transcript (Vercel function) → the lesson's
- * hand-written outline in seed.js. `source` tells the UI which one it got.
+ * nothing (video lessons) / reading notes in seed.js (no-video lessons). `source` tells the UI which one it got.
  */
 const cache = new Map()
 
@@ -18,7 +18,11 @@ function fetchLive(videoId) {
   return cache.get(videoId)
 }
 
-const outline = (lesson) => ({ segments: lesson.transcript || [], source: lesson.transcript?.length ? 'outline' : 'none', title: null, duration: null })
+// Video lessons never show the hand-written outline as a transcript: no real captions → empty.
+// Lessons without a video keep their notes (shown as reading notes, not a transcript).
+const outline = (lesson) => (lesson.youtube_id
+  ? { segments: [], source: 'none', title: null, duration: null }
+  : { segments: lesson.transcript || [], source: lesson.transcript?.length ? 'outline' : 'none', title: null, duration: null })
 
 export function useLessonTranscript(lesson) {
   const vid = lesson?.youtube_id

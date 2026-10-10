@@ -60,13 +60,13 @@ function fallbackAnswer({ lesson, course, question, t, n }) {
   const q = question.toLowerCase()
   const example = EXAMPLES[lesson.id] || lesson.summary
   const at = fmtTime(seg?.t ?? t)
-  if (/example|real/.test(q)) return `At **${at}** the video is on: “${seg?.text}”\n\n**Real-life version:** think of ${example}.\n\n**Try this:** describe the same situation with a different object from your own day — if the idea still works, you own it.`
-  if (/exam|test|marks|grade/.test(q)) return `This part (around **${at}**: “${seg?.text}”) is about **${topic.name}**.\n\n**Why it matters for the exam:** ${EXAM[course.id]}\n\n**Try this:** write the one-line definition of ${topic.name.toLowerCase()} from memory, then check it against the transcript line.`
+  if (/example|real/.test(q)) return `At **${at}** the video is on: “${seg?.text || lesson.summary}”\n\n**Real-life version:** think of ${example}.\n\n**Try this:** describe the same situation with a different object from your own day — if the idea still works, you own it.`
+  if (/exam|test|marks|grade/.test(q)) return `This part (around **${at}**: “${seg?.text || lesson.summary}”) is about **${topic.name}**.\n\n**Why it matters for the exam:** ${EXAM[course.id]}\n\n**Try this:** write the one-line definition of ${topic.name.toLowerCase()} from memory, then check it against the transcript line.`
   const templates = [
-    `At **${at}** the video is explaining: “${seg?.text}”\n\n**Here’s the idea in one line:** ${lesson.summary}\n\n**Try this:** pause, and say out loud what changes if you make the quantity in this step ten times smaller.`,
-    `Good question — you’re at **${at}**, where the key line is: “${seg?.text}”\n\n**Plain words:** this is about ${topic.name.toLowerCase()}. Picture ${example}.\n\n**Try this:** jump back 60 seconds in the transcript and watch how the idea was set up.`,
-    `Let me anchor this to the video. Around **${at}**: “${seg?.text}”\n\n**What to hold on to:** ${topic.name} is the concept being built here; everything after this point depends on it.\n\n**Try this:** open the interactive below and change one slider — then come back and tell me what moved.`,
-    `You’re not alone: this is one of the most-asked spots in the class (around **${at}**).\n\n“${seg?.text}”\n\n**In one sentence:** ${lesson.summary}\n\n**Try this:** explain it to me in your own words and I’ll tell you what you got right.`,
+    `At **${at}** the video is explaining: “${seg?.text || lesson.summary}”\n\n**Here’s the idea in one line:** ${lesson.summary}\n\n**Try this:** pause, and say out loud what changes if you make the quantity in this step ten times smaller.`,
+    `Good question — you’re at **${at}**, where the key line is: “${seg?.text || lesson.summary}”\n\n**Plain words:** this is about ${topic.name.toLowerCase()}. Picture ${example}.\n\n**Try this:** jump back 60 seconds in the transcript and watch how the idea was set up.`,
+    `Let me anchor this to the video. Around **${at}**: “${seg?.text || lesson.summary}”\n\n**What to hold on to:** ${topic.name} is the concept being built here; everything after this point depends on it.\n\n**Try this:** open the interactive below and change one slider — then come back and tell me what moved.`,
+    `You’re not alone: this is one of the most-asked spots in the class (around **${at}**).\n\n“${seg?.text || lesson.summary}”\n\n**In one sentence:** ${lesson.summary}\n\n**Try this:** explain it to me in your own words and I’ll tell you what you got right.`,
   ]
   return templates[n % templates.length]
 }
@@ -124,7 +124,7 @@ Answer in 3–6 short lines. Use **bold** for the key phrase. End with one small
       <div className="px-5 py-4 border-b border-charcoal-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-2xl bg-charcoal text-white flex items-center justify-center shrink-0"><Sparkles size={18} className="text-mango" /></div>
-          <div className="min-w-0"><div className="font-extrabold text-charcoal leading-tight flex items-center gap-1.5">BOLT Tutor <AITag /></div><div className="text-xs text-charcoal-400 truncate">{lesson.transcript_source === 'transcript' ? 'has the full video transcript' : lesson.youtube_id ? 'follows the lesson outline' : 'knows these notes'}</div></div>
+          <div className="min-w-0"><div className="font-extrabold text-charcoal leading-tight flex items-center gap-1.5">BOLT Tutor <AITag /></div><div className="text-xs text-charcoal-400 truncate">{lesson.transcript_source === 'transcript' ? 'has the full video transcript' : lesson.youtube_id ? 'no transcript for this video' : 'knows these notes'}</div></div>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-mango-50 text-mango-700 px-2.5 py-1 text-xs font-bold tabular-nums shrink-0"><Clock size={12} /> {fmtTime(currentTime)}</span>
       </div>
