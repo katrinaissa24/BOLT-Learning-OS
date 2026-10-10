@@ -16,6 +16,15 @@ const TABLES = {
   schedule: 'schedule', attendance: 'attendance', submissions: 'submissions', chatMessages: 'chat_messages', projects: 'projects',
 }
 
+/** Course content lives in code (src/data/seed.js), so new videos, transcripts and lessons show up without re-running SQL. */
+const CODE_OWNED = new Set(['courses', 'lessons', 'badges'])
+const rowKey = (r) => r.id ?? `${r.student_id}-${r.course_id}`
+const mergeRows = (base, rows) => {
+  const map = new Map(base.map((r) => [rowKey(r), r]))
+  rows.forEach((r) => map.set(rowKey(r), r))
+  return [...map.values()]
+}
+
 const LOCAL_WRITES = 'bolt.local.writes'
 const readWrites = () => { try { return JSON.parse(localStorage.getItem(LOCAL_WRITES)) ?? {} } catch { return {} } }
 const saveWrites = (w) => { try { localStorage.setItem(LOCAL_WRITES, JSON.stringify(w)) } catch { /* ignore */ } }
@@ -41,9 +50,11 @@ export function DataProvider({ children }) {
     ;(async () => {
       const next = {}
       await Promise.all(Object.entries(TABLES).map(async ([key, table]) => {
+        if (CODE_OWNED.has(key)) return
         try {
           const { data, error } = await supabase.from(table).select('*').limit(5000)
-          if (!error && Array.isArray(data) && data.length) next[key] = data
+          // merge on top of the demo seed instead of replacing it, so a half-seeded database never hides the demo activity
+          if (!error && Array.isArray(data) && data.length) next[key] = mergeRows(seed[key] || [], data)
         } catch { /* keep seed for this table */ }
       }))
       if (!cancelled) setDb((d) => ({ ...applyLocalWrites({ ...d, ...next }), source: Object.keys(next).length ? 'supabase' : 'local' }))

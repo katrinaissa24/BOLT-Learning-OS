@@ -5,8 +5,12 @@ import { studentOverview, attendanceSummary, studentBadges, recognitionPatterns,
 import { fmtTime } from '../../lib/utils'
 import { computeFlags } from './flags'
 import { PATTERN_META } from './recognitionMeta'
+import AIInsightCard from './AIInsightCard'
+import { studentDigest, studentFallback } from './progressInsights'
 
-/** Seven dots for one course journey. */
+export const STUDENT_SYS = "You are BOLT, helping a Grade 12 teacher understand one student's progress. Use ONLY the data given. Write 2 short paragraphs (how the student is doing across subjects and over time; what is holding them back, using their own tutor questions as evidence), then 'Next steps:' with 3 bullet points the teacher can do this week. Plain language, no headings, no markdown symbols except •."
+
+/** One dot per checkpoint of a course journey. */
 export function JourneyDots({ summary, color }) {
   return (
     <div className="flex items-center gap-1.5">
@@ -57,6 +61,10 @@ export default function StudentDetail({ db, student }) {
         <StatTile icon={MessageCircleQuestion} tone="info" label="Tutor questions" value={questions.length} hint={questions[0] ? `Last on ${lessonById(db, questions[0].lesson_id)?.title}` : 'None yet'} />
       </div>
 
+      <AIInsightCard title={`Progress insight for ${first}`} eyebrow="what the data says" resetKey={student.id}
+        placeholder={`A read of ${first}'s scores, pace, attendance, essays and tutor questions — what is going well, what is holding ${first} back, and three things to do this week.`}
+        build={() => { const d = studentDigest(db, student.id); return { system: STUDENT_SYS, prompt: d.text, fallback: studentFallback(d) } }} />
+
       <Card>
         <SectionHeader squiggle={false} eyebrow="journeys" title="Progress per course" className="mb-4" />
         <div className="grid md:grid-cols-3 gap-4">
@@ -66,7 +74,7 @@ export default function StudentDetail({ db, student }) {
               <div key={c.courseId} className="rounded-2xl border border-charcoal-100 p-4">
                 <div className="flex items-center justify-between gap-2 mb-2"><span className="font-bold text-charcoal text-sm">{course.title.split(':')[0]}</span><StatusPill status={c.status} /></div>
                 <JourneyDots summary={c} color={course.color} />
-                <div className="mt-3 text-xs text-charcoal-400">{c.completed}/7 checkpoints · avg {c.avgScore || '—'}%{c.currentLesson ? ` · now on “${c.currentLesson.title}”` : ' · journey complete'}</div>
+                <div className="mt-3 text-xs text-charcoal-400">{c.completed}/{c.total} checkpoints · avg {c.avgScore || '—'}%{c.currentLesson ? ` · now on “${c.currentLesson.title}”` : ' · journey complete'}</div>
               </div>
             )
           })}

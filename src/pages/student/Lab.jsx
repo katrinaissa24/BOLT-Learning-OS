@@ -1,6 +1,6 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Brain, MessageCircle, Bot, Search, Fingerprint, GitBranch, Swords, ArrowRight, Zap, Stamp } from 'lucide-react'
-import { PageTitle, Card, Pill, StatTile } from '../../components/ui'
+import { PageTitle, Card, Pill, StatTile, AITag } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
 import { CURRENT_MONTH } from '../../lib/selectors'
@@ -14,9 +14,9 @@ import DecisionSimulator from '../../components/lab/DecisionSimulator'
 import DebateArena from '../../components/lab/DebateArena'
 
 const GAMES = [
-  { id: 'debate-arena', title: 'Debate Arena', icon: Swords, badge: 'debate-victor', featured: true, text: 'Pick a motion and a side. Four rounds against an opponent that adapts to your level; scored on claim, evidence and rebuttal.', pts: '40–80', time: '10 min' },
-  { id: 'explain-back', title: 'Explain Back', icon: MessageCircle, badge: 'explainer', text: 'Explain a topic, then survive the follow-ups: Why? What if this changes? New scenario. Get rated Surface, Working or Deep.', pts: '30–80', time: '6 min' },
-  { id: 'teach-the-bot', title: 'Teach the Bot', icon: Bot, badge: 'bot-teacher', text: 'Ziko, a confused AI classmate, explains a concept with planted mistakes. Flag them and write the correction.', pts: '30–70', time: '5 min' },
+  { id: 'debate-arena', ai: true, title: 'Debate Arena', icon: Swords, badge: 'debate-victor', featured: true, text: 'Pick a motion and a side. Four rounds against an opponent that adapts to your level; scored on claim, evidence and rebuttal.', pts: '40–80', time: '10 min' },
+  { id: 'explain-back', ai: true, title: 'Explain Back', icon: MessageCircle, badge: 'explainer', text: 'Explain a topic, then survive the follow-ups: Why? What if this changes? New scenario. Get rated Surface, Working or Deep.', pts: '30–80', time: '6 min' },
+  { id: 'teach-the-bot', ai: true, title: 'Teach the Bot', icon: Bot, badge: 'bot-teacher', text: 'Ziko, a confused AI classmate, explains a concept with planted mistakes. Flag them and write the correction.', pts: '30–70', time: '5 min' },
   { id: 'spot-the-flaw', title: 'Spot the Flaw', icon: Search, badge: 'critical-eye', text: 'A confident AI answer with hidden errors in the math, the physics or the argument. Click the flawed lines.', pts: '20–40', time: '4 min' },
   { id: 'evidence-detective', title: 'Evidence Detective', icon: Fingerprint, badge: 'evidence-detective', text: 'A case file of five sources, claims and charts. Rate each Trust / Doubt / Reject and say why.', pts: '30–80', time: '6 min' },
   { id: 'decision-simulator', title: 'Decision Simulator', icon: GitBranch, badge: 'decision-maker', text: 'A real-world scenario with incomplete information. Four decisions, optional info that costs time, then a debrief.', pts: '30–80', time: '7 min' },
@@ -64,7 +64,7 @@ export default function Lab() {
                   <div className="flex gap-1.5">{g.featured && <Pill tone="mango">Featured</Pill>}<Pill tone={has ? 'success' : g.featured ? 'outline' : 'neutral'} className={g.featured && !has ? 'border-white/30 text-white/70' : ''}><BadgeIcon size={11} /> {has ? 'Stamped' : badge?.name}</Pill></div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-extrabold tracking-tight">{g.title}</h3>
+                  <h3 className="text-xl font-extrabold tracking-tight flex items-center gap-2">{g.title} {g.ai && <AITag />}</h3>
                   <p className={`text-sm mt-1.5 ${g.featured ? 'text-white/75' : 'text-charcoal-400'}`}>{g.text}</p>
                 </div>
                 <div className={`mt-auto flex items-center justify-between text-xs ${g.featured ? 'text-white/60' : 'text-charcoal-400'}`}>

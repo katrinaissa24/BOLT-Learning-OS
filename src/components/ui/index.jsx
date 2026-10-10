@@ -55,6 +55,11 @@ export function SuggestedTag({ className = '' }) {
   return <Pill tone="dark" icon={Sparkles} className={cx('normal-case tracking-normal', className)} title="Suggested feature — sample data, pending your decision to keep or remove">Suggested</Pill>
 }
 
+/** (AI) label: marks every feature that calls Claude. */
+export function AITag({ className = '' }) {
+  return <span title="AI feature (Claude Sonnet)" className={cx('inline-flex items-center gap-1 rounded-full bg-charcoal text-mango px-2 py-0.5 text-[10px] font-extrabold tracking-wide align-middle shrink-0', className)}><Sparkles size={10} /> AI</span>
+}
+
 /* ───────── Section header with brand squiggle ───────── */
 export function SectionHeader({ title, subtitle, action, squiggle = true, className = '', eyebrow, children }) {
   return (

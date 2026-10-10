@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Send, Sparkles, Clock } from 'lucide-react'
-import { Button } from '../ui'
+import { Button, AITag } from '../ui'
 import { useData } from '../../lib/data'
 import { ask, aiEnabled } from '../../lib/ai'
 import { fmtTime, cx } from '../../lib/utils'
@@ -16,6 +16,7 @@ const EXAMPLES = {
   'math-12-l5': 'a phone sensor that cannot read exactly zero but whose readings clearly head toward 1 as the angle shrinks',
   'math-12-l6': 'reading a car’s speedometer every second and adding up speed × 1 s to rebuild how far it went',
   'math-12-l7': 'a weather app’s “average temperature today”: area under the temperature curve divided by 24 hours',
+  'phy-12-l0': 'walking from the school gate to the cafeteria: 6 m east then 8 m north leaves you only 10 m from the gate, because displacement is a vector',
   'phy-12-l1': 'a dash-cam log of a car leaving a toll booth: the position graph curves, the velocity graph is a straight line whose slope is the acceleration',
   'phy-12-l2': 'dropping your phone from a balcony: speed grows by 9.8 m/s every second, distance by more and more each second',
   'phy-12-l3': 'pushing a loaded supermarket cart: nothing moves until your push beats friction, and then a = (F − friction)/m',
@@ -59,13 +60,13 @@ function fallbackAnswer({ lesson, course, question, t, n }) {
   const q = question.toLowerCase()
   const example = EXAMPLES[lesson.id] || lesson.summary
   const at = fmtTime(seg?.t ?? t)
-  if (/example|real/.test(q)) return `At **${at}** the video is on: “${seg?.text}”\n\n**Real-life version:** think of ${example}.\n\n**Try this:** describe the same situation with a different object from your own day — if the idea still works, you own it.`
-  if (/exam|test|marks|grade/.test(q)) return `This part (around **${at}**: “${seg?.text}”) is about **${topic.name}**.\n\n**Why it matters for the exam:** ${EXAM[course.id]}\n\n**Try this:** write the one-line definition of ${topic.name.toLowerCase()} from memory, then check it against the transcript line.`
+  if (/example|real/.test(q)) return `At **${at}** the video is on: “${seg?.text || lesson.summary}”\n\n**Real-life version:** think of ${example}.\n\n**Try this:** describe the same situation with a different object from your own day — if the idea still works, you own it.`
+  if (/exam|test|marks|grade/.test(q)) return `This part (around **${at}**: “${seg?.text || lesson.summary}”) is about **${topic.name}**.\n\n**Why it matters for the exam:** ${EXAM[course.id]}\n\n**Try this:** write the one-line definition of ${topic.name.toLowerCase()} from memory, then check it against the transcript line.`
   const templates = [
-    `At **${at}** the video is explaining: “${seg?.text}”\n\n**Here’s the idea in one line:** ${lesson.summary}\n\n**Try this:** pause, and say out loud what changes if you make the quantity in this step ten times smaller.`,
-    `Good question — you’re at **${at}**, where the key line is: “${seg?.text}”\n\n**Plain words:** this is about ${topic.name.toLowerCase()}. Picture ${example}.\n\n**Try this:** jump back 60 seconds in the transcript and watch how the idea was set up.`,
-    `Let me anchor this to the video. Around **${at}**: “${seg?.text}”\n\n**What to hold on to:** ${topic.name} is the concept being built here; everything after this point depends on it.\n\n**Try this:** open the interactive below and change one slider — then come back and tell me what moved.`,
-    `You’re not alone: this is one of the most-asked spots in the class (around **${at}**).\n\n“${seg?.text}”\n\n**In one sentence:** ${lesson.summary}\n\n**Try this:** explain it to me in your own words and I’ll tell you what you got right.`,
+    `At **${at}** the video is explaining: “${seg?.text || lesson.summary}”\n\n**Here’s the idea in one line:** ${lesson.summary}\n\n**Try this:** pause, and say out loud what changes if you make the quantity in this step ten times smaller.`,
+    `Good question — you’re at **${at}**, where the key line is: “${seg?.text || lesson.summary}”\n\n**Plain words:** this is about ${topic.name.toLowerCase()}. Picture ${example}.\n\n**Try this:** jump back 60 seconds in the transcript and watch how the idea was set up.`,
+    `Let me anchor this to the video. Around **${at}**: “${seg?.text || lesson.summary}”\n\n**What to hold on to:** ${topic.name} is the concept being built here; everything after this point depends on it.\n\n**Try this:** open the interactive below and change one slider — then come back and tell me what moved.`,
+    `You’re not alone: this is one of the most-asked spots in the class (around **${at}**).\n\n“${seg?.text || lesson.summary}”\n\n**In one sentence:** ${lesson.summary}\n\n**Try this:** explain it to me in your own words and I’ll tell you what you got right.`,
   ]
   return templates[n % templates.length]
 }
@@ -99,12 +100,18 @@ export default function TutorChat({ lesson, course, currentTime, studentId }) {
     const t = Math.round(currentTime)
     const topic = matchTopic(lesson, content)
     addChatMessage({ student_id: studentId, lesson_id: lesson.id, content, video_t: t, topic: topic.id })
+    const hasVideo = !!lesson.youtube_id
+    const kind = lesson.transcript_source === 'transcript' ? 'Full video transcript (seconds → what is said)' : 'Lesson outline (approximate seconds → idea)'
+    const recent = lesson.transcript.filter((x) => x.t <= t && x.t >= t - 90).map((x) => x.text).join(' ')
     const system = `You are tutoring on the lesson "${lesson.title}" in the course "${course.title}".
 Lesson summary: ${lesson.summary}
-Full transcript (seconds → text):
-${lesson.transcript.map((s) => `${s.t}s: ${s.text}`).join('\n')}
-The student is currently at ${t}s (${fmtTime(t)}). The transcript segment nearest that moment is: "${seg?.text}".
-Answer in 3–6 short lines. Anchor your answer to what the video is saying at that moment. Use **bold** for the key phrase. End with one small "Try this:" action.`
+Topics: ${lesson.topics.map((x) => x.name).join(', ')}
+${lesson.video_title ? `Video: "${lesson.video_title}"\n` : ''}${kind}:
+${lesson.transcript.map((x) => `${x.t}s: ${x.text}`).join('\n') || '(none available)'}
+${hasVideo ? `The student paused at ${t}s (${fmtTime(t)}). The nearest segment: "${seg?.text || ''}".
+What was said in the 90 seconds before that: "${recent}".
+Anchor your answer to that exact moment in the video; mention the timestamp when it helps them find it again.` : 'This lesson has no video; the student is reading the notes above.'}
+Answer in 3–6 short lines. Use **bold** for the key phrase. End with one small "Try this:" action.`
     const n = messages.filter((m) => m.role === 'user').length
     if (!aiEnabled) await new Promise((r) => setTimeout(r, 500 + Math.random() * 400))
     const reply = await ask({ system, messages: history.map((m) => ({ role: m.role, content: m.content })), fallback: () => fallbackAnswer({ lesson, course, question: content, t, n }), maxTokens: 500 })
@@ -117,7 +124,7 @@ Answer in 3–6 short lines. Anchor your answer to what the video is saying at t
       <div className="px-5 py-4 border-b border-charcoal-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-2xl bg-charcoal text-white flex items-center justify-center shrink-0"><Sparkles size={18} className="text-mango" /></div>
-          <div className="min-w-0"><div className="font-extrabold text-charcoal leading-tight">BOLT Tutor</div><div className="text-xs text-charcoal-400 truncate">knows this video</div></div>
+          <div className="min-w-0"><div className="font-extrabold text-charcoal leading-tight flex items-center gap-1.5">BOLT Tutor <AITag /></div><div className="text-xs text-charcoal-400 truncate">{lesson.transcript_source === 'transcript' ? 'has the full video transcript' : lesson.youtube_id ? 'no transcript for this video' : 'knows these notes'}</div></div>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-mango-50 text-mango-700 px-2.5 py-1 text-xs font-bold tabular-nums shrink-0"><Clock size={12} /> {fmtTime(currentTime)}</span>
       </div>
@@ -126,7 +133,9 @@ Answer in 3–6 short lines. Anchor your answer to what the video is saying at t
         {messages.length === 0 && (
           <div className="rounded-2xl bg-cloud p-4 text-sm text-charcoal-500 leading-relaxed">
             <div className="font-hand text-mango text-xl leading-none mb-1">hi {''}</div>
-            I’m following the video with you. Right now it’s saying: <span className="text-charcoal font-semibold">“{seg?.text}”</span>
+            {lesson.youtube_id && seg
+              ? <>I’m following the video with you. Right now it’s saying: <span className="text-charcoal font-semibold">“{seg.text}”</span></>
+              : <>I know this lesson’s notes. Ask me anything about <span className="text-charcoal font-semibold">{lesson.title}</span>.</>}
             <div className="mt-2 text-xs text-charcoal-400">Ask anything — I’ll answer from the exact moment you’re at.</div>
           </div>
         )}
