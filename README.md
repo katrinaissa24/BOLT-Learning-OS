@@ -56,3 +56,7 @@ src/
 ```
 
 Design system: EduBolt brand guidelines (Mango Orange `#FF9900`, Charcoal Blue `#353B48`, Montserrat, handwritten accent, lightning-bolt pattern).
+
+## Video transcripts (automatic)
+
+Any lesson's `youtube_id` (a bare id or any YouTube link) gets its real captions fetched automatically the first time the lesson opens, through `GET /api/transcript?v=<id or link>` (`server/youtubeTranscript.js`, no API key). The transcript shows under the video and is given to the AI tutor; it is cached in the browser and saved to the lesson row (`transcript_source = 'youtube'`), so it is fetched once. The endpoint runs in `npm run dev` / `npm run preview` and as a Vercel function (`api/transcript.js`). If you already ran the schema, run the last line of `supabase/01_schema.sql` (`alter table ... transcript_source`). Videos without captions keep their stored transcript.
