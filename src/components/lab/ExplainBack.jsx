@@ -67,8 +67,9 @@ export default function ExplainBack({ profile, preselect }) {
     await think(800)
     if (stage < 3) {
       const fb = bank.followups[stage]
-      const sys = `You are BOLT, probing a Grade 12 student's understanding of "${lesson.title}" (${course.title}). Stage ${stage + 1}: ${['ask WHY their explanation works', 'ask WHAT IF a number or condition changed', 'give a NEW SCENARIO to apply the idea'][stage]}. One question, max 2 sentences, reference something they wrote.`
-      const q = await ask({ system: sys, messages: [{ role: 'user', content: `Question asked: ${turns[turns.length - 1]?.text}\nStudent answered: ${text}` }], fallback: fb, maxTokens: 160 })
+      const sys = `You are BOLT, probing a Grade 12 student's understanding of "${lesson.title}" (${course.title}). Stage ${stage + 1}: ${['ask WHY their explanation works', 'ask WHAT IF a number or condition changed', 'give a NEW SCENARIO to apply the idea'][stage]}. 
+Reply in 2–4 short sentences: (1) say what is right or missing in what they wrote, quoting a few of their words; (2) explain what kind of answer you want (e.g. the reasoning behind a rule, not the rule itself); (3) end with ONE clear question. Do not give the full answer away. Always finish your sentences.`
+      const q = await ask({ system: sys, messages: [{ role: 'user', content: `Question asked: ${turns[turns.length - 1]?.text}\nStudent answered: ${text}` }], fallback: fb, maxTokens: 400 })
       setTurns((t) => [...t, { who: 'ai', label: STAGES[stage + 1], text: q }])
       setStage(stage + 1)
       setBusy(false)
