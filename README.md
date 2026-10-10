@@ -38,7 +38,7 @@ Then put `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env`.
 
 ## AI
 
-Set `VITE_ANTHROPIC_API_KEY` to turn on live AI (model `claude-opus-5-5`) for the tutor chat, extra practice generation, lesson insights, Explain Back, Teach the Bot, Debate Arena and the essay coach. The key is used from the browser for this prototype; move the calls behind an edge function before any public deployment.
+Set `ANTHROPIC_API_KEY` (server-side, e.g. a Vercel Secret) to turn on live AI (model `claude-opus-5-5`) for the tutor chat, extra practice generation, lesson insights, Explain Back, Teach the Bot, Debate Arena and the essay coach. The key is only read by the serverless function `api/ai.js`; the browser never sees it.
 
 ## Structure
 
