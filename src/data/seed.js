@@ -90,7 +90,7 @@ export const lessons = [
   {
     id: 'math-12-l1', course_id: 'math-12', position: 1,
     title: 'The Essence of Calculus',
-    youtube_id: 'WUvTyaaNkzM', duration_min: 17,
+    youtube_id: 'fYyARMqiaag', duration_min: 17,
     summary: 'Why calculus exists: slicing a circle into rings reveals how area, slope and tiny changes are connected.',
     topics: [{ id: 'area-rings', name: 'Area by slicing into rings' }, { id: 'tiny-changes', name: 'Reasoning with dx' }, { id: 'area-under-graph', name: 'Area under a graph' }],
     skills: ['problem-solving', 'critical-thinking'],
@@ -110,7 +110,7 @@ export const lessons = [
   {
     id: 'math-12-l2', course_id: 'math-12', position: 2,
     title: 'The Paradox of the Derivative',
-    youtube_id: '9vKqVkMQHKk', duration_min: 17,
+    youtube_id: '1EGFSefe5II', duration_min: 17,
     summary: 'Instantaneous rate of change sounds impossible. A car’s distance graph shows what the derivative really measures.',
     topics: [{ id: 'rate-of-change', name: 'Average vs instantaneous rate' }, { id: 'tangent-slope', name: 'Slope of the tangent line' }, { id: 'derivative-definition', name: 'Definition of the derivative' }],
     skills: ['problem-solving', 'critical-thinking'],
@@ -129,7 +129,7 @@ export const lessons = [
   {
     id: 'math-12-l3', course_id: 'math-12', position: 3,
     title: 'Derivative Formulas Through Geometry',
-    youtube_id: 'S0_qX4VJhMQ', duration_min: 18,
+    youtube_id: 'SzLF-wLZF_I', duration_min: 18,
     summary: 'The power rule and the derivative of sine fall out of squares, cubes and the unit circle.',
     topics: [{ id: 'power-rule', name: 'Power rule' }, { id: 'sine-derivative', name: 'Derivative of sin and cos' }, { id: 'geometric-reasoning', name: 'Geometric reasoning with dx' }],
     skills: ['problem-solving', 'creative-thinking'],
@@ -335,7 +335,24 @@ export const lessons = [
 
   /* ---------- PHYSICS ---------- */
   {
-    id: 'phy-12-l1', course_id: 'phy-12', position: 1,
+    id: 'phy-12-l0', course_id: 'phy-12', position: 1,
+    title: 'Vectors: Magnitude & Direction',
+    youtube_id: 'EwSHKuSxX_8', duration_min: 12,
+    summary: 'Every force, velocity and displacement in mechanics is a vector. Add them tip-to-tail, split them into x and y components, and the rest of physics gets easier.',
+    topics: [{ id: 'vector-scalar', name: 'Vectors vs scalars' }, { id: 'vector-components', name: 'Components (x and y)' }, { id: 'vector-addition', name: 'Adding vectors' }],
+    skills: ['problem-solving', 'critical-thinking'],
+    interactive: 'vector-adder',
+    transcript: [
+      { t: 0, text: 'A scalar has only a size (mass, time, speed). A vector has a size and a direction (displacement, velocity, force).' },
+      { t: 90, text: 'Draw a vector as an arrow: its length is the magnitude, the way it points is the direction.' },
+      { t: 200, text: 'To add two vectors, place them tip-to-tail; the resultant goes from the first tail to the last tip.' },
+      { t: 320, text: 'Any vector can be split into components: Ax = A·cos θ and Ay = A·sin θ.' },
+      { t: 440, text: 'Add the x parts together and the y parts together, then rebuild: |R| = √(Rx² + Ry²), θ = tan⁻¹(Ry/Rx).' },
+      { t: 580, text: 'Example: 6 m east then 8 m north gives a 10 m displacement at about 53° north of east.' },
+    ],
+  },
+  {
+    id: 'phy-12-l1', course_id: 'phy-12', position: 2,
     title: 'Motion in a Straight Line',
     youtube_id: 'ZM8ECpBuQYE', duration_min: 11,
     summary: 'Position, velocity and acceleration — and how to read them off graphs of a real car.',
@@ -352,7 +369,7 @@ export const lessons = [
     ],
   },
   {
-    id: 'phy-12-l2', course_id: 'phy-12', position: 2,
+    id: 'phy-12-l2', course_id: 'phy-12', position: 3,
     title: 'Derivatives in Physics',
     youtube_id: 'ObHJJYvu3RE', duration_min: 10,
     summary: 'Calculus is the language of motion: velocity is the derivative of position, acceleration of velocity.',
@@ -369,7 +386,7 @@ export const lessons = [
     ],
   },
   {
-    id: 'phy-12-l3', course_id: 'phy-12', position: 3,
+    id: 'phy-12-l3', course_id: 'phy-12', position: 4,
     title: 'Newton’s Laws',
     youtube_id: 'kKKM8Y-u7ds', duration_min: 11,
     summary: 'Inertia, F = ma, and action–reaction — with free-body diagrams you can build yourself.',
@@ -386,7 +403,7 @@ export const lessons = [
     ],
   },
   {
-    id: 'phy-12-l4', course_id: 'phy-12', position: 4,
+    id: 'phy-12-l4', course_id: 'phy-12', position: 5,
     title: 'Uniform Circular Motion',
     youtube_id: 'bpFK2VCRHUs', duration_min: 10,
     summary: 'Why you lean in a turning car: centripetal acceleration and the “fictitious” centrifugal force.',
@@ -402,7 +419,7 @@ export const lessons = [
     ],
   },
   {
-    id: 'phy-12-l5', course_id: 'phy-12', position: 5,
+    id: 'phy-12-l5', course_id: 'phy-12', position: 6,
     title: 'Newtonian Gravity',
     youtube_id: '7gf6YpdvtE0', duration_min: 9,
     summary: 'The apple and the Moon obey the same law. Orbits, g on other planets, and why astronauts float.',
@@ -418,7 +435,7 @@ export const lessons = [
     ],
   },
   {
-    id: 'phy-12-l6', course_id: 'phy-12', position: 6,
+    id: 'phy-12-l6', course_id: 'phy-12', position: 7,
     title: 'Work, Energy & Power',
     youtube_id: 'w4QFJb9a8vo', duration_min: 10,
     summary: 'Energy is the currency of physics: a roller coaster trades height for speed and friction takes a cut.',
@@ -434,7 +451,7 @@ export const lessons = [
     ],
   },
   {
-    id: 'phy-12-l7', course_id: 'phy-12', position: 7,
+    id: 'phy-12-l7', course_id: 'phy-12', position: 8,
     title: 'Collisions & Momentum',
     youtube_id: 'Y-QOfc2XqOk', duration_min: 9,
     summary: 'Momentum, impulse and why crumple zones save lives — elastic vs inelastic collisions you can run.',
@@ -479,7 +496,7 @@ export const badges = [
   { id: 'peer-mentor', name: 'Peer Mentor', category: 'Verified Demonstration', skill: 'collaboration', icon: 'users', rarity: 'rare', description: 'Helped a classmate master a topic, confirmed by the teacher.', how_to_earn: 'Tutor a classmate in a study session the teacher verifies.' },
   { id: 'momentum', name: 'Momentum', category: 'Consistency', skill: 'consistency', icon: 'flame', rarity: 'common', description: 'Seven days of learning in a row.', how_to_earn: 'Complete any activity on seven consecutive days.' },
   { id: 'calculus-navigator', name: 'Calculus Navigator', category: 'Mastery', skill: 'problem-solving', icon: 'sigma', rarity: 'epic', description: 'Completed the full Calculus journey.', how_to_earn: 'Finish all 7 checkpoints in Calculus: Change & Motion.' },
-  { id: 'force-of-nature', name: 'Force of Nature', category: 'Mastery', skill: 'problem-solving', icon: 'atom', rarity: 'epic', description: 'Completed the full Physics journey.', how_to_earn: 'Finish all 7 checkpoints in Physics: Mechanics of the Real World.' },
+  { id: 'force-of-nature', name: 'Force of Nature', category: 'Mastery', skill: 'problem-solving', icon: 'atom', rarity: 'epic', description: 'Completed the full Physics journey.', how_to_earn: 'Finish all 8 checkpoints in Physics: Mechanics of the Real World.' },
   { id: 'wordsmith', name: 'Wordsmith', category: 'Mastery', skill: 'communication', icon: 'feather', rarity: 'epic', description: 'Completed the full English journey.', how_to_earn: 'Finish all 7 checkpoints in English: Argument & Craft.' },
   { id: 'honest-process', name: 'Honest Process', category: 'AI Literacy', skill: 'ai-literacy', icon: 'shield-check', rarity: 'uncommon', description: 'Used AI transparently in an essay and improved the draft with your own revisions.', how_to_earn: 'Submit an essay where AI assistance is declared and your own edits outweigh AI text.' },
 ]
@@ -493,18 +510,18 @@ function rng(seed) {
 
 /* Student archetypes drive progress so the teacher dashboards show real patterns */
 const archetypes = {
-  [MAYA_ID]: { math: ['on-track', 5, 76], eng: ['ahead', 6, 88], phy: ['on-track', 4, 72], weak: ['chain-rule', 'lhopital', 'centripetal'] },
-  [U(11)]: { math: ['ahead', 7, 92], eng: ['on-track', 5, 78], phy: ['ahead', 6, 90], weak: ['pathos'] },
-  [U(12)]: { math: ['on-track', 5, 81], eng: ['ahead', 7, 93], phy: ['on-track', 5, 79], weak: ['free-fall'] },
-  [U(13)]: { math: ['at-risk', 2, 41], eng: ['behind', 3, 58], phy: ['at-risk', 2, 44], weak: ['power-rule', 'chain-rule', 'f-equals-ma', 'thesis'] },
-  [U(14)]: { math: ['on-track', 5, 70], eng: ['on-track', 5, 74], phy: ['behind', 3, 61], weak: ['centripetal', 'orbits'] },
-  [U(15)]: { math: ['behind', 3, 55], eng: ['on-track', 4, 69], phy: ['on-track', 4, 73], weak: ['tangent-slope', 'rate-of-change'] },
-  [U(16)]: { math: ['ahead', 6, 89], eng: ['ahead', 6, 91], phy: ['ahead', 6, 87], weak: [] },
-  [U(17)]: { math: ['on-track', 4, 66], eng: ['behind', 3, 52], phy: ['on-track', 4, 68], weak: ['nominalization', 'thesis'] },
-  [U(18)]: { math: ['on-track', 5, 74], eng: ['on-track', 5, 80], phy: ['on-track', 5, 77], weak: ['sine-derivative'] },
-  [U(19)]: { math: ['at-risk', 1, 35], eng: ['at-risk', 2, 40], phy: ['behind', 2, 48], weak: ['area-rings', 'tiny-changes', 'position-velocity', 'sensory-detail'] },
-  [U(20)]: { math: ['on-track', 5, 79], eng: ['on-track', 5, 83], phy: ['ahead', 6, 85], weak: ['lhopital'] },
-  [U(21)]: { math: ['behind', 3, 59], eng: ['on-track', 4, 71], phy: ['behind', 3, 57], weak: ['chain-rule', 'energy-conservation'] },
+  [MAYA_ID]: { math: ['on-track', 5, 76], eng: ['ahead', 6, 88], phy: ['on-track', 5, 72], weak: ['chain-rule', 'lhopital', 'centripetal'] },
+  [U(11)]: { math: ['ahead', 7, 92], eng: ['on-track', 5, 78], phy: ['ahead', 7, 90], weak: ['pathos'] },
+  [U(12)]: { math: ['on-track', 5, 81], eng: ['ahead', 7, 93], phy: ['on-track', 6, 79], weak: ['free-fall'] },
+  [U(13)]: { math: ['at-risk', 2, 41], eng: ['behind', 3, 58], phy: ['at-risk', 3, 44], weak: ['power-rule', 'chain-rule', 'f-equals-ma', 'thesis', 'vector-components'] },
+  [U(14)]: { math: ['on-track', 5, 70], eng: ['on-track', 5, 74], phy: ['behind', 4, 61], weak: ['centripetal', 'orbits'] },
+  [U(15)]: { math: ['behind', 3, 55], eng: ['on-track', 4, 69], phy: ['on-track', 5, 73], weak: ['tangent-slope', 'rate-of-change'] },
+  [U(16)]: { math: ['ahead', 6, 89], eng: ['ahead', 6, 91], phy: ['ahead', 7, 87], weak: [] },
+  [U(17)]: { math: ['on-track', 4, 66], eng: ['behind', 3, 52], phy: ['on-track', 5, 68], weak: ['nominalization', 'thesis'] },
+  [U(18)]: { math: ['on-track', 5, 74], eng: ['on-track', 5, 80], phy: ['on-track', 6, 77], weak: ['sine-derivative'] },
+  [U(19)]: { math: ['at-risk', 1, 35], eng: ['at-risk', 2, 40], phy: ['behind', 3, 48], weak: ['area-rings', 'tiny-changes', 'position-velocity', 'sensory-detail', 'vector-addition'] },
+  [U(20)]: { math: ['on-track', 5, 79], eng: ['on-track', 5, 83], phy: ['ahead', 7, 85], weak: ['lhopital'] },
+  [U(21)]: { math: ['behind', 3, 59], eng: ['on-track', 4, 71], phy: ['behind', 4, 57], weak: ['chain-rule', 'energy-conservation'] },
 }
 
 const courseKey = { 'math-12': 'math', 'eng-12': 'eng', 'phy-12': 'phy' }
@@ -809,6 +826,15 @@ export const chatMessages = [
   q('cm-36', MAYA_ID, 'math-12-l2', 440, 'derivative-definition', 'Why does t³ give 3t²? Can you walk the algebra once?', '2026-09-10T15:20:00Z'),
   q('cm-37', U(13), 'math-12-l2', 440, 'derivative-definition', 'I lost it at the algebra part', '2026-09-10T15:22:00Z'),
   q('cm-38', U(21), 'math-12-l2', 445, 'derivative-definition', 'where did the dt squared go', '2026-09-10T15:25:00Z'),
+  q('cm-39', MAYA_ID, 'phy-12-l0', 330, 'vector-components', 'Why is the x part cos and the y part sin? Does it ever switch?', '2026-09-04T09:10:00Z'),
+  q('cm-40', U(13), 'phy-12-l0', 340, 'vector-components', 'what if the angle is more than 90, is the component negative', '2026-09-04T09:14:00Z'),
+  q('cm-41', U(19), 'phy-12-l0', 210, 'vector-addition', 'why cant I just add 6 and 8 to get 14', '2026-09-04T09:20:00Z'),
+  q('cm-42', U(15), 'phy-12-l0', 215, 'vector-addition', 'tip to tail, which one goes first', '2026-09-04T09:22:00Z'),
+  q('cm-43', U(21), 'phy-12-l0', 450, 'vector-addition', 'how do I get the angle of the resultant back', '2026-09-04T09:30:00Z'),
+  q('cm-44', U(14), 'phy-12-l0', 60, 'vector-scalar', 'is speed a vector or is velocity the vector', '2026-09-04T09:35:00Z'),
+  q('cm-45', MAYA_ID, 'math-12-l3', 220, 'power-rule', 'Is there a quick way to see why x³ gives 3x² and not 3x?', '2026-09-17T15:30:00Z'),
+  q('cm-46', MAYA_ID, 'math-12-l1', 300, 'area-under-graph', 'How does adding up thin rectangles become an exact area?', '2026-09-04T15:30:00Z'),
+  q('cm-47', MAYA_ID, 'eng-12-l3', 120, 'nominalization', 'How do I spot a zombie noun in my own essay fast?', '2026-09-23T11:20:00Z'),
 ]
 
 /* ───────────────────────── Project showcase ───────────────────────── */

@@ -117,7 +117,16 @@ select "id", "student_id"::uuid, "lesson_id", "role", "content", "video_t", "top
 ('cm-35',bolt_u(11),'eng-12-l5','user','Can a villain have a hero’s journey?',180,'hero-journey','2026-10-07T11:00:00Z'),
 ('cm-36',bolt_u(10),'math-12-l2','user','Why does t³ give 3t²? Can you walk the algebra once?',440,'derivative-definition','2026-09-10T15:20:00Z'),
 ('cm-37',bolt_u(13),'math-12-l2','user','I lost it at the algebra part',440,'derivative-definition','2026-09-10T15:22:00Z'),
-('cm-38',bolt_u(21),'math-12-l2','user','where did the dt squared go',445,'derivative-definition','2026-09-10T15:25:00Z')
+('cm-38',bolt_u(21),'math-12-l2','user','where did the dt squared go',445,'derivative-definition','2026-09-10T15:25:00Z'),
+('cm-39',bolt_u(10),'phy-12-l0','user','Why is the x part cos and the y part sin? Does it ever switch?',330,'vector-components','2026-09-04T09:10:00Z'),
+('cm-40',bolt_u(13),'phy-12-l0','user','what if the angle is more than 90, is the component negative',340,'vector-components','2026-09-04T09:14:00Z'),
+('cm-41',bolt_u(19),'phy-12-l0','user','why cant I just add 6 and 8 to get 14',210,'vector-addition','2026-09-04T09:20:00Z'),
+('cm-42',bolt_u(15),'phy-12-l0','user','tip to tail, which one goes first',215,'vector-addition','2026-09-04T09:22:00Z'),
+('cm-43',bolt_u(21),'phy-12-l0','user','how do I get the angle of the resultant back',450,'vector-addition','2026-09-04T09:30:00Z'),
+('cm-44',bolt_u(14),'phy-12-l0','user','is speed a vector or is velocity the vector',60,'vector-scalar','2026-09-04T09:35:00Z'),
+('cm-45',bolt_u(10),'math-12-l3','user','Is there a quick way to see why x³ gives 3x² and not 3x?',220,'power-rule','2026-09-17T15:30:00Z'),
+('cm-46',bolt_u(10),'math-12-l1','user','How does adding up thin rectangles become an exact area?',300,'area-under-graph','2026-09-04T15:30:00Z'),
+('cm-47',bolt_u(10),'eng-12-l3','user','How do I spot a zombie noun in my own essay fast?',120,'nominalization','2026-09-23T11:20:00Z')
 ) v("id", "student_id", "lesson_id", "role", "content", "video_t", "topic", "created_at")
 on conflict do nothing;
 

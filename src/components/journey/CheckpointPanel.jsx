@@ -3,7 +3,7 @@ import { Card, Button, Pill, StatusPill, ScoreBar, scoreTextClass, SkillChip } f
 import { fmtDate } from '../../lib/utils'
 
 /** Side panel for a selected checkpoint. node: { lesson, progress, state, score, weakTopics } */
-export default function CheckpointPanel({ node, course, onBranch, onClose, lessonLink }) {
+export default function CheckpointPanel({ node, course, total = 7, onBranch, onClose, lessonLink }) {
   if (!node) {
     return (
       <Card className="h-full flex flex-col items-center justify-center text-center py-10">
@@ -20,7 +20,7 @@ export default function CheckpointPanel({ node, course, onBranch, onClose, lesso
     <Card className="h-full flex flex-col gap-4 fade-up">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-400">Checkpoint {lesson.position} of 7</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-400">Checkpoint {lesson.position} of {total}</div>
           <h3 className="text-lg font-extrabold tracking-tight text-charcoal leading-tight">{lesson.title}</h3>
         </div>
         <button onClick={onClose} className="p-1.5 rounded-full hover:bg-charcoal-100 text-charcoal-400" aria-label="Close panel"><X size={16} /></button>

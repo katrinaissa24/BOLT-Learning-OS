@@ -8,16 +8,8 @@ export const parentIdeas = [
     title: 'Weekly 3-line digest',
     icon: 'message-square',
     channel: 'WhatsApp / email · Friday 17:00',
-    description: 'Three sentences every Friday: one win, one thing to watch, one thing to say at dinner. No login needed.',
-    mock: { kind: 'digest', lines: ['Win: Maya finished “Building a Fictional World” with 93%.', 'Watch: chain rule is still at 44% — practice branch assigned.', 'Say tonight: “Show me one chain-rule example.”'] },
-  },
-  {
-    id: 'dinner',
-    title: 'Dinner-table questions',
-    icon: 'utensils',
-    channel: 'Generated from this week’s lessons',
-    description: 'Three questions you can ask tonight, written so you don’t need to know the subject. Teaching a parent is the strongest re-check.',
-    built: true,
+    description: 'Three sentences every Friday: one win, one thing to watch, one thing to try at home. No login needed.',
+    mock: { kind: 'digest', lines: ['Win: Maya finished “Building a Fictional World” with 93%.', 'Watch: chain rule is still at 44% — practice branch assigned.', 'Try tonight: ask Maya to show you one chain-rule example.'] },
   },
   {
     id: 'office-hours',

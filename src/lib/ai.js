@@ -5,7 +5,15 @@
  * - Set VITE_AI_ENABLED=false to force demo mode (e.g. plain `npm run dev` without `vercel dev`).
  */
 export const aiEnabled = import.meta.env.VITE_AI_ENABLED !== 'false'
-export const AI_MODEL = 'claude-opus-5-5'
+export const AI_MODEL = 'claude-sonnet-5-5'
+
+let statusPromise = null
+/** Asks the server whether a key is configured. Resolves true/false; never throws. */
+export function checkAI() {
+  if (!aiEnabled) return Promise.resolve(false)
+  statusPromise ??= fetch('/api/ai').then((r) => (r.ok ? r.json() : {})).then((d) => !!d.enabled).catch(() => false)
+  return statusPromise
+}
 
 const BOLT_PERSONA = `You are BOLT, the AI tutor inside a school learning operating system for a single Grade 12 school.
 Be warm, concrete and brief. Prefer questions that make the student think over giving answers away.

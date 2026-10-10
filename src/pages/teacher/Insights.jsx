@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ReferenceLine } from 'recharts'
-import { Sparkles, AlertTriangle, Lightbulb, EyeOff, Clock, Wand2, Presentation, Zap } from 'lucide-react'
-import { PageTitle, Card, SectionHeader, Button, Pill, Avatar, StatTile, Callout, SuggestedTag } from '../../components/ui'
+import { Sparkles, AlertTriangle, Lightbulb, EyeOff, Clock, Wand2, Presentation } from 'lucide-react'
+import { PageTitle, Card, SectionHeader, Button, Pill, Avatar, StatTile, Callout, SuggestedTag, AITag } from '../../components/ui'
+import AIInsightCard from '../../components/teacher/AIInsightCard'
+import { STUDENT_SYS } from '../../components/teacher/StudentDetail'
+import { studentDigest, studentFallback, classDigest, classFallback } from '../../components/teacher/progressInsights'
+import { studentsOf } from '../../lib/selectors'
 import { useData } from '../../lib/data'
 import { ask, aiEnabled } from '../../lib/ai'
 import { lessonInsights, courseLessons, courseById, profileById, lessonById } from '../../lib/selectors'
@@ -31,6 +35,9 @@ export default function Insights() {
   const [summary, setSummary] = useState('')
   const [thinking, setThinking] = useState(false)
   const [showPlan, setShowPlan] = useState(false)
+  const students = useMemo(() => studentsOf(db), [db])
+  const [pick, setPick] = useState(students[0]?.id)
+  const picked = students.find((s) => s.id === pick) || students[0]
   useEffect(() => { setSummary(''); setShowPlan(false) }, [lessonId])
 
   const go = (id) => nav(`/teacher/insights/${id}`)
@@ -54,7 +61,32 @@ export default function Insights() {
 
   return (
     <div className="space-y-8">
-      <PageTitle eyebrow="what the class got stuck on" title="Lesson Insights" subtitle="Where students paused the video to ask, what they asked, and how each topic scored — so re-teaching targets the minute that matters." />
+      <PageTitle eyebrow="what the class got stuck on" title="Insights" subtitle="How each student and the whole class is progressing, plus where students paused each video to ask and how each topic scored — so re-teaching targets the minute that matters." />
+
+      {/* Progress insights: whole class + one student */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <AIInsightCard title="Whole-class progress" eyebrow="all 12 students"
+          placeholder="Who is ahead, who is slipping, the weak spots the class shares, and what to do about it this week."
+          build={() => ({
+            system: 'You are BOLT, helping a Grade 12 teacher read their whole class. Use ONLY the data given. Write: one short paragraph on who needs attention and why (name students by first name), one on shared weak topics and trends, then "Next steps:" with 3 bullet points (•). No headings, no markdown.',
+            prompt: classDigest(db),
+            fallback: classFallback(db),
+          })} />
+        <div className="flex flex-col gap-3">
+          <Card className="py-3">
+            <label className="flex items-center gap-3 text-sm font-semibold text-charcoal">
+              <span className="shrink-0">Student</span>
+              <select value={picked?.id} onChange={(e) => setPick(e.target.value)} className="flex-1 rounded-xl border border-charcoal-200 bg-white px-3 py-2 text-sm">
+                {students.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
+              </select>
+              <Link to={`/teacher/tracker/${picked?.id}`} className="text-xs text-mango-700 hover:underline shrink-0">profile →</Link>
+            </label>
+          </Card>
+          {picked && <AIInsightCard title={`${picked.full_name.split(' ')[0]}'s progress`} eyebrow="one student" resetKey={picked.id} className="flex-1"
+            placeholder={`Scores, pace, attendance, essays and tutor questions for ${picked.full_name} — turned into a short read and three next steps.`}
+            build={() => { const d = studentDigest(db, picked.id); return { system: STUDENT_SYS, prompt: d.text, fallback: studentFallback(d) } }} />}
+        </div>
+      </div>
 
       {/* Course / lesson pickers */}
       <Card className="flex flex-wrap items-center gap-3">
@@ -90,7 +122,7 @@ export default function Insights() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatTile label="Completed" value={`${insights.completedCount}/12`} hint="students finished this checkpoint" />
+        <StatTile label="Completed" value={`${insights.completedCount}/${students.length}`} hint="students finished this checkpoint" />
         <StatTile label="Class average" value={`${insights.avgScore || '—'}%`} tone={insights.avgScore >= 70 ? 'success' : 'danger'} hint="on the lesson check" />
         <StatTile label="Questions asked" value={insights.questions.length} tone="info" hint={`${new Set(insights.questions.map((q) => q.student_id)).size} different students`} />
         <StatTile label="Avg time on lesson" value={`${insights.avgTime || '—'} min`} tone="dark" hint={`video is ${lesson.duration_min} min`} />
@@ -198,14 +230,13 @@ export default function Insights() {
         </Card>
 
         <Card className="lg:col-span-2 flex flex-col">
-          <SectionHeader squiggle={false} eyebrow="ask BOLT" title="AI summary" className="mb-3" />
+          <SectionHeader squiggle={false} eyebrow="ask BOLT" title={<span className="flex items-center gap-2">Lesson summary <AITag /></span>} className="mb-3" />
           {summary ? (
             <div className="rounded-2xl bg-charcoal text-white p-4 text-sm leading-relaxed whitespace-pre-line fade-up flex-1">{summary}</div>
           ) : (
             <div className="rounded-2xl bg-cloud p-4 text-sm text-charcoal-400 flex-1">Get a two-paragraph read of this lesson: what students got stuck on, who, and one concrete next step.</div>
           )}
           <Button className="mt-4 w-full" onClick={summarize} loading={thinking}><Sparkles size={16} /> {summary ? 'Summarize again' : 'Ask AI to summarize'}</Button>
-          <div className="mt-2 text-[11px] text-charcoal-400 flex items-center gap-1"><Zap size={11} className="text-mango" /> {aiEnabled ? 'Live AI connected.' : 'Demo answer shown. Works live as soon as the AI API key is attached.'}</div>
         </Card>
       </div>
     </div>
