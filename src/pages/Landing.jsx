@@ -132,8 +132,9 @@ function WhatMatters() {
                     <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: on ? m.color : 'rgba(255,255,255,0.08)', color: on ? '#fff' : m.color }}><m.icon size={21} /></div>
                     <div className={cx('font-mono text-xs font-bold', on ? 'text-charcoal-300' : 'text-white/40')}>0{i + 1}</div>
                   </div>
-                  <div className={cx('mt-4 font-extrabold tracking-tight leading-tight transition-all duration-500', on ? 'text-3xl md:text-4xl' : 'text-xl lg:[writing-mode:vertical-rl] lg:rotate-180 lg:mt-auto lg:text-2xl')}>{m.title}</div>
-                  <div className={cx('transition-all duration-500', on ? 'opacity-100 translate-y-0 mt-3' : 'opacity-0 translate-y-3 h-0 overflow-hidden lg:absolute')}>
+                  <motion.div key={on ? 'on' : 'off'} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className={cx('mt-4 font-extrabold tracking-tight leading-tight', on ? 'text-3xl md:text-4xl' : 'text-xl lg:mt-auto')}>{m.title}</motion.div>
+                  <div className={cx('transition-[opacity,transform] duration-300', on ? 'opacity-100 translate-x-0 mt-3' : 'opacity-0 -translate-x-4 h-0 overflow-hidden lg:absolute')}>
                     <div className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: m.color }}>{m.tool}</div>
                     <p className="mt-2 text-charcoal-500 max-w-md">{m.text}</p>
                     <div className="mt-5 space-y-2 max-w-sm">
