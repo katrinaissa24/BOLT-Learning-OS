@@ -5,7 +5,7 @@ import { Card, Button, Pill, Callout } from '../ui'
 import { useData } from '../../lib/data'
 import { courseById } from '../../lib/selectors'
 import { SCENARIOS } from '../../data/lab'
-import { GameShell, ResultCard, Steps, think } from './shared'
+import { GameShell, ResultCard, CoachChat, Steps, think } from './shared'
 import { cx } from '../../lib/utils'
 
 export default function DecisionSimulator({ profile }) {
@@ -106,6 +106,9 @@ export default function DecisionSimulator({ profile }) {
             <ResultCard eyebrow="debrief" title={`Reasoning score ${result.score}/100`} points={result.pts} badgeEarned={result.badgeNew ? 'Decision Maker' : null} tone={result.score >= 80 ? 'mango' : 'light'} onReplay={reset} replayLabel="Another scenario">
               {result.raw}/{result.max} on choices{result.infoBonus ? `, +${result.infoBonus} for deciding after gathering facts` : ''}{minutes > 60 ? ', −5 for spending over an hour on information' : ''}. {result.score >= 80 ? 'You shrank uncertainty cheaply before acting, then prioritised the group with the least flexibility.' : 'Best moves: get cheap information first, protect the group that cannot move, and avoid big irreversible actions on vague warnings.'}
             </ResultCard>
+          )}
+          {result && (
+            <CoachChat key={sc.id} name={profile.full_name.split(' ')[0]} context={`Game: Decision Simulator — scenario "${sc.title}": ${sc.setting}\nThe student's decisions (score out of 3 each):\n${log.map((e, i) => `${i + 1}. ${sc.steps[i].prompt} → chose "${e.choice.text}" (${e.choice.score}/3: ${e.choice.feedback})${e.askedInfo ? ' after asking for more info' : ''}`).join('\n')}\nReasoning score: ${result.score}/100, ${minutes} min spent on information.`} />
           )}
         </div>
         <div className="space-y-4">

@@ -4,7 +4,7 @@ import { Card, Button, Pill, Callout, Input } from '../ui'
 import { useData } from '../../lib/data'
 import { courseById } from '../../lib/selectors'
 import { CASE_FILES } from '../../data/lab'
-import { GameShell, ResultCard, think } from './shared'
+import { GameShell, ResultCard, CoachChat, think } from './shared'
 import { cx } from '../../lib/utils'
 
 const VERDICTS = [['trust', 'Trust', ShieldCheck, 'success'], ['doubt', 'Doubt', HelpCircle, 'mango'], ['reject', 'Reject', Ban, 'danger']]
@@ -98,7 +98,11 @@ export default function EvidenceDetective({ profile }) {
             <ResultCard eyebrow={result.accuracy >= 90 ? 'case closed' : 'case reopened'} title={result.accuracy >= 90 ? 'Detective-grade judgement' : `${result.accuracy}% accuracy`} points={result.pts} badgeEarned={result.badgeNew ? 'Evidence Detective' : null} tone={result.accuracy >= 90 ? 'mango' : 'light'} onReplay={() => { setKase(null); setRatings({}); setReasons({}); setResult(null) }} replayLabel="Next case file">
               {result.accuracy >= 90 ? 'You separated the source from the spin.' : 'Doubt is for real sources with overstated claims; Reject is for no source at all.'}
             </ResultCard>
-          ) : (
+          ) : null}
+          {result && (
+            <CoachChat key={kase.id} name={profile.full_name.split(' ')[0]} context={`Game: Evidence Detective — case "${kase.title}": ${kase.brief}\nThe student rated each exhibit Trust / Doubt / Reject with a reason.\n${kase.sources.map((s, i) => `Exhibit ${String.fromCharCode(65 + i)} (${s.type}) "${s.title}": ${s.excerpt}\n  Correct: ${s.verdict} (${s.why}). Student: ${ratings[i]}${reasons[i] ? `, because "${reasons[i]}"` : ' (no reason given)'}`).join('\n')}\nAccuracy: ${result.accuracy}%.`} />
+          )}
+          {!result && (
             <Callout tone="mango" icon={Fingerprint} title="Detective’s rule">Ask three questions: who made it, what is the sample, and does the claim match the data. “Everyone knows” is a confession, not a citation.</Callout>
           )}
         </div>

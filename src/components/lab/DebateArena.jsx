@@ -5,8 +5,8 @@ import { Card, Button, Textarea, Pill, ProgressBar } from '../ui'
 import { ask, askJSON, aiEnabled } from '../../lib/ai'
 import { useData } from '../../lib/data'
 import { courseById } from '../../lib/selectors'
-import { MOTIONS, ECHO_TEMPLATES } from '../../data/lab'
-import { GameShell, Bubble, Typing, ResultCard, Steps, think, quoteFrom } from './shared'
+import { MOTIONS } from '../../data/lab'
+import { GameShell, Bubble, Typing, ResultCard, Steps, think } from './shared'
 import { cx, clamp } from '../../lib/utils'
 
 const ROUNDS = 4
@@ -71,8 +71,7 @@ export default function DebateArena({ profile }) {
     setTurns([]); setRound(0); setScores([]); setVerdict(null); setDraft('')
     setBusy(true)
     await think(700)
-    const opening = motion_[aiSide].opening
-    const text = await ask({ system: `You are the opponent in a Grade 12 debate. Motion: "${motion_.text}". You argue ${aiSide.toUpperCase()} the motion. Give a 2-sentence opening statement. Be sharp, fair, school-appropriate.`, messages: [{ role: 'user', content: 'Give your opening statement.' }], fallback: opening, maxTokens: 200 })
+    const text = await ask({ system: `You are the opponent in a Grade 12 debate. Motion: "${motion_.text}". You argue ${aiSide.toUpperCase()} the motion. Give a 2-sentence opening statement. Be sharp, fair, school-appropriate.`, messages: [{ role: 'user', content: 'Give your opening statement.' }], fallback: '⚠️ BOLT couldn’t reach the AI for this turn. Check the connection and start a new debate to try again.', maxTokens: 200 })
     setTurns([{ who: 'ai', text, label: 'Opening' }])
     setBusy(false)
   }
@@ -97,11 +96,10 @@ export default function DebateArena({ profile }) {
     await think(900)
     // opponent reply (adaptive to the round and the student's own words)
     const history = [...turns, { who: 'you', text }].map((t) => `${t.who === 'ai' ? 'Opponent' : 'Student'}: ${t.text}`).join('\n')
-    const echo = ECHO_TEMPLATES[(r - 1) % ECHO_TEMPLATES.length].replace('{quote}', quoteFrom(text, 70))
-    const fallback = `${echo} ${motion_[aiSide].rebuttals[Math.min(r - 1, 3)]}`
+    const fallback = '⚠️ BOLT couldn’t reach the AI for this turn. Check the connection and start a new debate to try again.'
     const reply = r < ROUNDS
       ? await ask({ system: `You are the opponent in a 4-round Grade 12 debate. Motion: "${motion_.text}". You argue ${aiSide.toUpperCase()}. Round ${r} of ${ROUNDS}. Adapt to the student's level: if their argument scored ${detail.total}/10, respond at a slightly higher level. Quote one phrase from their last message, rebut it, add one new point. 3–4 sentences max.\nHistory:\n${history}`, messages: [{ role: 'user', content: 'Reply to the student’s latest argument.' }], fallback, maxTokens: 300 })
-      : await ask({ system: `You are the opponent in a debate on "${motion_.text}" arguing ${aiSide}. The 4 rounds are over. Give a 2-sentence closing that acknowledges the student's strongest point and restates your case.\nHistory:\n${history}`, messages: [{ role: 'user', content: 'Closing statement.' }], fallback: `${echo} ${motion_[aiSide].rebuttals[3]} That is my closing — a good match.`, maxTokens: 200 })
+      : await ask({ system: `You are the opponent in a debate on "${motion_.text}" arguing ${aiSide}. The 4 rounds are over. Give a 2-sentence closing that acknowledges the student's strongest point and restates your case.\nHistory:\n${history}`, messages: [{ role: 'user', content: 'Closing statement.' }], fallback, maxTokens: 200 })
     setTurns((t) => [...t, { who: 'ai', text: reply, label: r < ROUNDS ? `Rebuttal ${r}` : 'Closing' }])
     setRound(r)
     setBusy(false)

@@ -9,7 +9,8 @@ import { GameShell, Bubble, Typing, ResultCard, Steps, think, quoteFrom, bumpCou
 import { cx, clamp } from '../../lib/utils'
 
 const LEVELS = { Surface: { pts: 30, tone: 'danger', text: 'You can state the rule. Next: explain the reason behind it and test it on a new case.' }, Working: { pts: 50, tone: 'mango', text: 'You can explain and adapt it. Next: argue it from first principles, with numbers.' }, Deep: { pts: 80, tone: 'success', text: 'You explained the why, handled a change, and transferred it to a new scenario. That is understanding.' } }
-const STAGES = ['Explain', 'Why?', 'What if…', 'New scenario']
+const STAGES = ['Example', 'Why?', 'What if…', 'New scenario']
+const STAGE_GOALS = ['ask WHY their example works (e.g. “In your example, why does … ?”)', 'change one detail of their example and ask WHAT IF (e.g. “Give me an example where … changes — what happens?”)', 'give a NEW real-life SCENARIO and ask them to produce an example in it']
 
 function assessLocally(answers, bank) {
   const kws = bank.keywords.map((k) => k.toLowerCase())
@@ -31,23 +32,6 @@ function assessLocally(answers, bank) {
   return { level, evidence, coverage }
 }
 
-/** Offline follow-up: react to what the student wrote (right / partly / missing), then ask the next question. */
-function localFollowup(text, bank, stage, lesson) {
-  const lower = text.toLowerCase()
-  const hits = bank.keywords.filter((k) => lower.includes(k.toLowerCase()))
-  const words = text.trim().split(/\s+/).filter(Boolean).length
-  const reason = /\b(because|since|so|which means|therefore)\b/.test(lower)
-  const offTopic = /integral|integrat/.test(lower) && !/integral|integrat/i.test(`${lesson.title} ${bank.question}`)
-  const quote = `“${quoteFrom(text, 60)}”`
-  let react
-  if (offTopic) react = `Careful: you wrote ${quote}, but this is about derivatives, not integrals. Mixing the two up is common, so keep them separate.`
-  else if (hits.length >= 3 && reason) react = `Good: ${quote} uses the key ideas (${hits.slice(0, 3).join(', ')}) and gives a reason.`
-  else if (hits.length >= 1) react = `Partly there: ${quote} mentions ${hits.slice(0, 2).join(' and ')}, but it states the rule more than it explains why it works.`
-  else react = `Not quite yet: ${quote} ${words < 8 ? 'is very short' : 'repeats the rule'} without the idea behind it. I'm looking for the reasoning, not the formula.`
-  const hint = bank.modelPoints?.[stage] && !/^Explains /.test(bank.modelPoints[stage]) ? `\n\nHint: ${bank.modelPoints[stage].charAt(0).toLowerCase()}${bank.modelPoints[stage].slice(1)}.` : ''
-  return `${react}${hint}\n\n${bank.followups[stage]}`
-}
-
 export default function ExplainBack({ profile, preselect }) {
   const { db, awardPoints, awardBadge } = useData()
   const [lessonId, setLessonId] = useState(preselect && db.lessons.some((l) => l.id === preselect) ? preselect : 'math-12-l4')
@@ -57,6 +41,7 @@ export default function ExplainBack({ profile, preselect }) {
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
+  const [error, setError] = useState(false)
   const feedRef = useRef(null)
   const lesson = db.lessons.find((l) => l.id === lessonId)
   const course = courseById(db, lesson.course_id)
@@ -70,7 +55,15 @@ export default function ExplainBack({ profile, preselect }) {
   const start = async () => {
     setTurns([]); setAnswers([]); setResult(null); setDraft('')
     setBusy(true); await think(500)
-    setTurns([{ who: 'ai', label: STAGES[0], text: bank.question }])
+    const opener = await ask({
+      system: `You open an "Explain Back" session on "${lesson.title}" (${course.title}) for ${profile.full_name.split(' ')[0]}. Write ONE short, friendly question (max 2 sentences) that asks them to GIVE AN EXAMPLE that shows the idea — e.g. "Give me an example of …" or "Show me … by rewriting …". Never ask them to "explain" or "define" it. Make it concrete and answerable by a 17-year-old. Reference idea: ${bank.question}`,
+      messages: [{ role: 'user', content: 'Ask me the opening question.' }],
+      fallback: '',
+      maxTokens: 200,
+    })
+    if (!opener) { setError(true); setBusy(false); return }
+    setError(false)
+    setTurns([{ who: 'ai', label: STAGES[0], text: opener }])
     setStage(0); setBusy(false)
   }
 
@@ -83,10 +76,18 @@ export default function ExplainBack({ profile, preselect }) {
     setBusy(true)
     await think(800)
     if (stage < 3) {
-      const fb = () => localFollowup(text, bank, stage, lesson)
-      const sys = `You are BOLT, probing a Grade 12 student's understanding of "${lesson.title}" (${course.title}). Stage ${stage + 1}: ${['ask WHY their explanation works', 'ask WHAT IF a number or condition changed', 'give a NEW SCENARIO to apply the idea'][stage]}. 
-Reply in 2–4 short sentences: (1) say clearly whether what they wrote is correct, partly correct or incorrect (point out any mistake, e.g. confusing derivative and integral), quoting a few of their words; (2) explain what kind of answer you want (e.g. the reasoning behind a rule, not the rule itself); (3) end with ONE clear question. Do not give the full answer away. Always finish your sentences.`
-      const q = await ask({ system: sys, messages: [{ role: 'user', content: `Question asked: ${turns[turns.length - 1]?.text}\nStudent answered: ${text}` }], fallback: fb, maxTokens: 400 })
+      const sys = `You are BOLT, coaching ${profile.full_name.split(' ')[0]} through "${lesson.title}" (${course.title}). Key ideas they should reach: ${bank.modelPoints.join('; ')}.
+Every reply has TWO parts, 2–5 short sentences total:
+(1) A personalised response to exactly what they wrote — quote a few of their words. If it is right, say what makes it good; if partly right or wrong, name the specific gap or mistake. If they say they don't know, are unsure or wrote very little, do NOT just ask again: give a small, concrete example or the key idea in plain words so they have something to hold on to.
+(2) ONE follow-up question that asks them to DO something concrete — prefer "Give me an example of …", "Rewrite … so that …", "Show me …", "What happens to your example if …". Never "Explain …" or "Why does …" on its own. This stage's goal: ${STAGE_GOALS[stage]}.
+Don't give away the full answer to the follow-up. Always finish your sentences.`
+      const history = turns.map((t) => ({ role: t.who === 'ai' ? 'assistant' : 'user', content: t.text }))
+      const q = await ask({ system: sys, messages: [{ role: 'user', content: 'Start the session.' }, ...history, { role: 'user', content: text }], fallback: '', maxTokens: 450 })
+      if (!q) { // AI unreachable: undo this turn so the student can retry — never show a canned reply
+        setAnswers(answers); setTurns((t) => t.slice(0, -1)); setDraft(text); setError(true); setBusy(false)
+        return
+      }
+      setError(false)
       setTurns((t) => [...t, { who: 'ai', label: STAGES[stage + 1], text: q }])
       setStage(stage + 1)
       setBusy(false)
@@ -136,13 +137,15 @@ Reply in 2–4 short sentences: (1) say clearly whether what they wrote is corre
               </div>
               <div className="rounded-2xl bg-cloud p-4 mt-auto flex flex-wrap items-center justify-between gap-3">
                 <div><div className="text-[11px] uppercase tracking-wide text-charcoal-400 font-semibold">Selected</div><div className="font-bold text-charcoal">{lesson.title}</div></div>
+                {error && <span className="text-xs text-danger">BOLT couldn’t reach the AI. Try again.</span>}
                 <Button onClick={start} loading={busy}><MessageCircle size={16} /> Start explaining</Button>
               </div>
             </div>
           ) : (
             <>
               <div ref={feedRef} className="flex-1 overflow-y-auto p-5 space-y-4 max-h-[520px]">
-                {turns.map((t, i) => <Bubble key={i} who={t.who} name={t.who === 'ai' ? `BOLT · ${t.label}` : profile.full_name.split(' ')[0]}>{t.text}</Bubble>)}
+                {turns.map((t, i) => <Bubble key={i} who={t.who} name={t.who === 'ai' ? `BOLT · ${t.label}` : profile.full_name.split(' ')[0]}><span className="whitespace-pre-line">{t.text}</span></Bubble>)}
+                {error && !busy && <div className="rounded-xl bg-danger-soft text-charcoal text-sm p-3">BOLT couldn’t reach the AI just now. Your answer is still in the box — press Answer to try again.</div>}
                 {busy && <Typing name={stage === 3 && answers.length === 4 ? 'Assessing' : 'BOLT'} />}
                 {result && (
                   <div className="pt-2">
@@ -155,8 +158,8 @@ Reply in 2–4 short sentences: (1) say clearly whether what they wrote is corre
               {stage >= 0 && stage < 4 && (
                 <div className="border-t border-charcoal-100 p-4">
                   <div className="flex items-center justify-between mb-2 text-xs text-charcoal-400"><span>{STAGES[stage]} · stage {stage + 1} of 4</span><Steps total={4} current={stage} /></div>
-                  <Textarea rows={4} value={draft} onChange={(e) => setDraft(e.target.value)} disabled={busy} placeholder="Explain it the way you would to a classmate — reasons, not just rules." onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send() }} />
-                  <div className="flex items-center justify-between mt-2"><span className="text-xs text-charcoal-400">{draft.trim().split(/\s+/).filter(Boolean).length} words</span><Button onClick={send} disabled={busy || draft.trim().length < 10}><Send size={16} /> {stage === 3 ? 'Submit for assessment' : 'Answer'}</Button></div>
+                  <Textarea rows={4} value={draft} onChange={(e) => setDraft(e.target.value)} disabled={busy} placeholder="Give a real example and your reasoning. Stuck? Say “I don’t know” and BOLT will help." onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send() }} />
+                  <div className="flex items-center justify-between mt-2"><span className="text-xs text-charcoal-400">{draft.trim().split(/\s+/).filter(Boolean).length} words</span><Button onClick={send} disabled={busy || draft.trim().length < 2}><Send size={16} /> {stage === 3 ? 'Submit for assessment' : 'Answer'}</Button></div>
                 </div>
               )}
             </>
