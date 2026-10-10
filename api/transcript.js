@@ -1,13 +1,14 @@
-// Serverless route (Vercel / Netlify-compatible signature): GET /api/transcript?v=<youtube url or id>
-import { getTranscript } from '../server/youtubeTranscript.js'
+import { fetchTranscript } from './_lib/youtube.js'
 
+/** GET /api/transcript?v=<youtubeId> → { title, duration, segments: [{ t, text }] }. Cached at the edge for a day. */
 export default async function handler(req, res) {
-  const url = new URL(req.url, 'http://x')
+  const v = String(req.query?.v || '')
   try {
-    const data = await getTranscript(url.searchParams.get('v'))
-    res.setHeader('Cache-Control', 's-maxage=604800')
-    res.status(200).json(data)
+    const data = await fetchTranscript(v)
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800')
+    return res.status(200).json(data)
   } catch (err) {
-    res.status(404).json({ error: err.message })
+    res.setHeader('Cache-Control', 's-maxage=600')
+    return res.status(502).json({ error: err?.message || 'transcript unavailable' })
   }
 }

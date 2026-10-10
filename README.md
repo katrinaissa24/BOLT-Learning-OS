@@ -38,7 +38,22 @@ Then put `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env`.
 
 ## AI
 
-Set `VITE_ANTHROPIC_API_KEY` to turn on live AI (model `claude-opus-5-5`) for the tutor chat, extra practice generation, lesson insights, Explain Back, Teach the Bot, Debate Arena and the essay coach. The key is used from the browser for this prototype; move the calls behind an edge function before any public deployment.
+Set `ANTHROPIC_API_KEY` (server-side, e.g. a Vercel Secret) to turn on live AI. Every call goes through the serverless function `api/ai.js` using **Claude Sonnet** (`claude-sonnet-5-5`); the browser never sees the key. Without the key, every AI feature falls back to a built-in demo answer. Each AI feature carries an **AI** label in the UI:
+
+- BOLT Tutor in every lesson (knows the video transcript and the timestamp the student paused at)
+- Essay coach ("Ask BOLT") in essay lessons
+- Thinking Lab: Debate Arena, Explain Back, Teach the Bot
+- Teacher Insights: whole-class progress, per-student progress (also on each student profile), per-lesson summary
+
+### Video transcripts
+
+`api/transcript.js` pulls a video's captions from YouTube on demand (cached for a day), so the tutor gets the real transcript with timestamps. If YouTube blocks the server, bake them in from any machine with normal internet:
+
+```
+npm run fetch:transcripts        # writes src/data/transcripts.json, then commit it
+```
+
+Lessons fall back to the hand-written outline in `src/data/seed.js` when no transcript is available. Lessons with no `youtube_id` show reading notes instead of a video.
 
 ## Structure
 
@@ -56,7 +71,3 @@ src/
 ```
 
 Design system: EduBolt brand guidelines (Mango Orange `#FF9900`, Charcoal Blue `#353B48`, Montserrat, handwritten accent, lightning-bolt pattern).
-
-## Video transcripts (automatic)
-
-Any lesson's `youtube_id` (a bare id or any YouTube link) gets its real captions fetched automatically the first time the lesson opens, through `GET /api/transcript?v=<id or link>` (`server/youtubeTranscript.js`, no API key). The transcript shows under the video and is given to the AI tutor; it is cached in the browser and saved to the lesson row (`transcript_source = 'youtube'`), so it is fetched once. The endpoint runs in `npm run dev` / `npm run preview` and as a Vercel function (`api/transcript.js`). If you already ran the schema, run the last line of `supabase/01_schema.sql` (`alter table ... transcript_source`). Videos without captions keep their stored transcript.

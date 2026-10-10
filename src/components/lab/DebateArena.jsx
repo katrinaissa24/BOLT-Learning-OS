@@ -126,7 +126,7 @@ export default function DebateArena({ profile }) {
   /* ───── setup ───── */
   if (!motion_ || !side || turns.length === 0) {
     return (
-      <GameShell title="Debate Arena" eyebrow="argue it out" icon={Swords} badge={badge}>
+      <GameShell ai title="Debate Arena" eyebrow="argue it out" icon={Swords} badge={badge}>
         <div className="grid lg:grid-cols-[1fr_300px] gap-6">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-400 mb-2">1 · Choose a motion</div>
@@ -167,7 +167,7 @@ export default function DebateArena({ profile }) {
 
   /* ───── arena ───── */
   return (
-    <GameShell title="Debate Arena" eyebrow="argue it out" icon={Swords} badge={badge} course={course}>
+    <GameShell ai title="Debate Arena" eyebrow="argue it out" icon={Swords} badge={badge} course={course}>
       <Card padded={false} className="mb-5 overflow-hidden">
         <div className="bg-charcoal text-white px-5 py-3 flex flex-wrap items-center justify-between gap-3 bolt-pattern-dark">
           <div><div className="text-[10px] uppercase tracking-widest text-white/50 font-semibold">Motion</div><div className="font-extrabold">“{motion_.text}”</div></div>

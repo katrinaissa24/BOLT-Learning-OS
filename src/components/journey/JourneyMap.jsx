@@ -3,10 +3,10 @@ import { motion } from 'framer-motion'
 import { ChevronsRight } from 'lucide-react'
 import { cx } from '../../lib/utils'
 
-export const MAP_W = 1800
+export const MAP_W = 2060
 export const MAP_H = 520
-const NODE_X = [130, 385, 640, 895, 1150, 1405, 1660]
-const NODE_Y = [330, 205, 300, 180, 320, 215, 285]
+const NODE_X = [130, 385, 640, 895, 1150, 1405, 1660, 1915]
+const NODE_Y = [330, 205, 300, 180, 320, 215, 285, 200]
 export const nodePos = (i) => ({ x: NODE_X[i] ?? 130 + i * 255, y: NODE_Y[i] ?? 280 })
 
 function segment(a, b) {

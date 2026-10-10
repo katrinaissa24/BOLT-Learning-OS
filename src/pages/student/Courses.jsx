@@ -24,7 +24,7 @@ export default function Courses() {
   const { db } = useData()
   return (
     <div>
-      <PageTitle eyebrow="my courses" title="Three journeys, one term." subtitle="Each course is a landscape of seven checkpoints. Open a journey to see where you are, what is weak, and where to branch out." />
+      <PageTitle eyebrow="my courses" title="Three journeys, one term." subtitle="Each course is a landscape of checkpoints. Open a journey to see where you are, what is weak, and where to branch out." />
 
       <div className="rounded-2xl bg-charcoal text-white px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-2 mb-6 bolt-pattern-dark">
         <span className="font-extrabold tracking-tight">Grade 12 · Term 1 · 3 courses</span>

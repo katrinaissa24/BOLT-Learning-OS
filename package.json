@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "gen:sql": "node scripts/generate-seed-sql.mjs"
+    "gen:sql": "node scripts/generate-seed-sql.mjs",
+    "fetch:transcripts": "node scripts/fetch-transcripts.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

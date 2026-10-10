@@ -18,13 +18,13 @@ export function examForecast(db, courseId) {
     const sum = studentOverview(db, s.id).courses.find((c) => c.courseId === courseId)
     const scores = sum.topicScores.map((t) => t.score)
     const mastery = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 50
-    const pace = sum.completed / 5 // class is expected at 5 of 7
+    const pace = sum.completed / sum.expected // where the class is expected to be
     const projected = Math.round(Math.max(20, Math.min(98, mastery * 0.8 + Math.min(1.1, pace) * 20 - (pace < 0.8 ? 6 : 0))))
     const evidence = scores.length / (sum.lessons.length * 3)
     const band = Math.round(14 - evidence * 8) // ±
     const confidence = evidence > 0.6 ? 'high' : evidence > 0.3 ? 'medium' : 'low'
     const risk = projected < 50 ? 'high' : projected < 65 ? 'medium' : 'low'
-    return { student: s, projected, band, confidence, risk, mastery: Math.round(mastery), completed: sum.completed, daysToExam, weakest: sum.weakTopics[0] || null }
+    return { student: s, projected, band, confidence, risk, mastery: Math.round(mastery), completed: sum.completed, total: sum.total, daysToExam, weakest: sum.weakTopics[0] || null }
   }).sort((a, b) => a.projected - b.projected)
 }
 
@@ -64,7 +64,7 @@ export function ExamRiskForecast({ db, courseId, compact = false }) {
               <Avatar name={r.student.full_name} size="sm" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-charcoal truncate">{r.student.full_name}</div>
-                <div className="text-xs text-charcoal-400 truncate">Projected {r.projected}% · {r.completed}/7 done{r.weakest ? ` · weakest: ${r.weakest.name} (${r.weakest.score}%)` : ''}</div>
+                <div className="text-xs text-charcoal-400 truncate">Projected {r.projected}% · {r.completed}/{r.total} done{r.weakest ? ` · weakest: ${r.weakest.name} (${r.weakest.score}%)` : ''}</div>
               </div>
               <ArrowRight size={14} className="text-charcoal-300" />
             </Link>

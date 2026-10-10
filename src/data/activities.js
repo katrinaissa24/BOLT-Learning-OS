@@ -40,6 +40,10 @@ export const ACTIVITIES = {
   },
 
   /* ───────── PHYSICS ───────── */
+  'phy-12-l0': {
+    component: 'vector-adder',
+    question: { type: 'numeric', topic: 'vector-addition', prompt: 'You walk 6 m east (A = 6 m at 0°), then 8 m north (B = 8 m at 90°). How far are you from where you started? (metres)', answer: 10, tolerance: 0.1, unit: 'm', hint: 'Set the sliders, then read |R|. Or: the components are Rx = 6 and Ry = 8.', explanation: '|R| = √(6² + 8²) = √100 = 10 m, at tan⁻¹(8/6) ≈ 53° north of east. You walked 14 m but ended up only 10 m away.' },
+  },
   'phy-12-l1': {
     component: 'motion-graphs',
     question: { type: 'numeric', topic: 'acceleration', prompt: 'Set a = 2 m/s² and v₀ = 3 m/s. What is the car’s velocity after 5 s?', answer: 13, tolerance: 0.2, unit: 'm/s', hint: 'v = v₀ + a·t. Read it off the velocity graph.', explanation: 'v = 3 + 2·5 = 13 m/s. The velocity graph is a straight line whose slope is the acceleration.' },

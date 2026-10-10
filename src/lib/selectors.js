@@ -37,14 +37,16 @@ export function studentCourseSummary(db, studentId, courseId) {
   })
   const weakTopics = topicScores.filter((t) => t.score < 60).sort((a, b) => a.score - b.score)
   const strongTopics = topicScores.filter((t) => t.score >= 80).sort((a, b) => b.score - a.score)
+  // longer journeys (e.g. physics with its vectors checkpoint) shift the expected point
+  const expected = EXPECTED_COMPLETED + Math.max(0, lessons.length - 7)
   let status = 'on-track'
-  if (completed >= EXPECTED_COMPLETED + 1) status = 'ahead'
-  else if (completed <= EXPECTED_COMPLETED - 3 || (completed > 0 && avgScore < 50)) status = 'at-risk'
-  else if (completed <= EXPECTED_COMPLETED - 2) status = 'behind'
+  if (completed >= expected + 1) status = 'ahead'
+  else if (completed <= expected - 3 || (completed > 0 && avgScore < 50)) status = 'at-risk'
+  else if (completed <= expected - 2) status = 'behind'
   const current = rows.find((r) => r.progress?.status !== 'completed')
   const points = db.pointEvents.filter((p) => p.student_id === studentId && p.course_id === courseId).reduce((a, b) => a + b.points, 0)
   const timeSpent = completedRows.reduce((a, r) => a + (r.progress.time_spent_min || 0), 0)
-  return { courseId, studentId, lessons, rows, completed, total: lessons.length, percent: Math.round((completed / lessons.length) * 100), avgScore, weakTopics, strongTopics, topicScores, status, currentLesson: current?.lesson || null, nextLesson: current?.lesson || null, points, timeSpent }
+  return { courseId, studentId, lessons, rows, completed, expected, total: lessons.length, percent: Math.round((completed / lessons.length) * 100), avgScore, weakTopics, strongTopics, topicScores, status, currentLesson: current?.lesson || null, nextLesson: current?.lesson || null, points, timeSpent }
 }
 
 export function studentOverview(db, studentId) {
@@ -152,7 +154,7 @@ export function parentLens(db, childId) {
     const course = courseById(db, c.courseId)
     const daysToExam = Math.round((new Date(course.exam_date) - TODAY) / 86400000)
     c.weakTopics.slice(0, 2).forEach((t) => alerts.push({ level: t.score < 45 ? 'high' : 'medium', courseId: c.courseId, course: course.title, topic: t.name, score: t.score, lessonId: t.lessonId, daysToExam, text: `${t.name} is at ${t.score}% with ${daysToExam} days until the ${course.subject} exam.`, action: `Ask ${child.full_name.split(' ')[0]} to run the extra-practice branch for “${t.lessonTitle}” this week; it takes about 15 minutes.` }))
-    if (c.status === 'behind' || c.status === 'at-risk') alerts.push({ level: c.status === 'at-risk' ? 'high' : 'medium', courseId: c.courseId, course: course.title, text: `${course.title}: ${c.completed}/${c.total} checkpoints done, class is expected at 5.`, action: 'Set a 30-minute BOLT session twice this week to catch up one checkpoint at a time.' })
+    if (c.status === 'behind' || c.status === 'at-risk') alerts.push({ level: c.status === 'at-risk' ? 'high' : 'medium', courseId: c.courseId, course: course.title, text: `${course.title}: ${c.completed}/${c.total} checkpoints done, class is expected at ${c.expected}.`, action: 'Set a 30-minute BOLT session twice this week to catch up one checkpoint at a time.' })
   })
   if (att.absent >= 3) alerts.push({ level: 'high', text: `${att.absent} absences since September.`, action: 'Talk about what is getting in the way of attending; the school can help.' })
   if (att.streak >= 20) alerts.push({ level: 'good', text: `${att.streak} school days in a row with a clean attendance record.`, action: 'Say it out loud at dinner — consistency is a skill.' })

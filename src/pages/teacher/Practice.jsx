@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Wand2, Send, Users, CheckCircle2, Zap, Hash, ListChecks, PenLine } from 'lucide-react'
+import { Wand2, Send, Users, CheckCircle2, Hash, ListChecks, PenLine } from 'lucide-react'
 import { PageTitle, Card, SectionHeader, Button, Pill, StatusPill, Avatar, Tabs, Callout, ScoreBar } from '../../components/ui'
 import { useData } from '../../lib/data'
-import { aiEnabled } from '../../lib/ai'
 import { generatePractice } from '../../lib/practice'
 import { studentsOf, studentOverview, courseById, lessonById, courseLessons, profileById } from '../../lib/selectors'
 import { STATUS_ORDER, STATUS_COLOR, scoreColor, scoreInk } from '../../components/teacher/charts'
@@ -47,7 +46,7 @@ export default function Practice() {
     const course = courseById(db, scope.courseId !== 'all' ? scope.courseId : wk[0]?.courseId || 'math-12')
     const [res] = await Promise.all([
       generatePractice({ lesson, course, topics: wk, studentName: entry.student.full_name.split(' ')[0], count: 5 }),
-      new Promise((r) => setTimeout(r, aiEnabled ? 0 : 700)),
+      new Promise((r) => setTimeout(r, 700)),
     ])
     return { items: res, lesson, topics: wk }
   }
@@ -140,7 +139,6 @@ export default function Practice() {
                   <div className="font-hand text-mango text-2xl leading-none mb-1">tailored to {first}</div>
                   <h3 className="text-xl font-extrabold tracking-tight">Generate extra practice</h3>
                   <p className="text-sm text-white/70 mt-1 max-w-xl">5 items on {targetTopics.length ? targetTopics.map((t) => `${t.name} (${t.score}%)`).join(', ') : 'the lesson topics'} — real-life scenarios, mixed difficulty, with the reason each item was chosen.</p>
-                  <div className="mt-2 text-[11px] text-white/50 flex items-center gap-1"><Zap size={11} className="text-mango" /> {aiEnabled ? 'Generated live by Claude.' : 'Curated bank in demo mode; works live as soon as the AI API key is attached.'}</div>
                 </div>
                 <Button size="lg" onClick={generate} loading={busy} disabled={!topics.length}><Wand2 size={18} /> {busy ? 'Generating…' : 'Generate extra practice'}</Button>
               </div>
