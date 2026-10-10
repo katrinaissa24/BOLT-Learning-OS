@@ -15,7 +15,7 @@ const ROLES = [
 export default function AuthPage() {
   const [params] = useSearchParams()
   const nav = useNavigate()
-  const { signIn, signUp, loginDemo, enterLocalDemo, profile, supabaseConfigured } = useAuth()
+  const { signIn, signUp, loginDemo, enterLocalDemo, profile } = useAuth()
   const [mode, setMode] = useState(params.get('mode') === 'signup' ? 'signup' : 'signin')
   const [role, setRole] = useState(params.get('role') || 'student')
   const [email, setEmail] = useState('')
@@ -108,7 +108,6 @@ export default function AuthPage() {
               ))}
             </div>
             <div className="mt-3 text-xs text-charcoal-400 flex items-center gap-1.5"><KeyRound size={12} /> Password for all demo accounts: <code className="font-semibold text-charcoal">{DEMO_PASSWORD}</code></div>
-            {!supabaseConfigured && <div className="mt-2 text-xs text-charcoal-400">Supabase keys not set — running in local demo mode (everything works, data lives in this browser).</div>}
           </div>
         </div>
       </div>

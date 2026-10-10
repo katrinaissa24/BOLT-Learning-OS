@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, Trophy, Stamp, CalendarDays, Brain, Hammer, Users, BarChart3, FileSearch, Wand2, Award, HeartHandshake, Bell, LogOut, Menu, X, Zap, Sparkles, Database, WifiOff } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Trophy, Stamp, CalendarDays, Brain, Hammer, Users, BarChart3, FileSearch, Wand2, Award, HeartHandshake, Bell, LogOut, Menu, X, Zap, Sparkles } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { useData } from '../../lib/data'
-import { checkAI } from '../../lib/ai'
 import { Logo, Avatar, Pill } from '../ui'
 import { cx } from '../../lib/utils'
 import { studentOverview } from '../../lib/selectors'
@@ -37,12 +36,10 @@ const NAV = {
 }
 
 export default function AppShell({ role }) {
-  const { profile, signOut, isLocalMode, supabaseConfigured } = useAuth()
+  const { profile, signOut } = useAuth()
   const { db } = useData()
   const nav = useNavigate()
   const [open, setOpen] = useState(false)
-  const [live, setLive] = useState(null) // null = checking
-  useEffect(() => { checkAI().then(setLive) }, [])
   const items = NAV[role] || []
   const points = role === 'student' && profile ? studentOverview(db, profile.id).totalPoints : null
 
@@ -57,14 +54,6 @@ export default function AppShell({ role }) {
           </NavLink>
         ))}
       </nav>
-      <div className="p-4 space-y-2 border-t border-white/10">
-        <div className="flex items-center gap-2 text-[11px] text-white/60">
-          {supabaseConfigured && !isLocalMode ? <><Database size={12} /> Supabase connected</> : <><WifiOff size={12} /> Local demo mode</>}
-        </div>
-        <div className="flex items-center gap-2 text-[11px] text-white/60">
-          <Zap size={12} className={live ? 'text-mango' : ''} /> {live ? 'Live AI enabled' : live === null ? 'Checking AI…' : 'AI in demo mode (add API key)'}
-        </div>
-      </div>
     </aside>
   )
 
