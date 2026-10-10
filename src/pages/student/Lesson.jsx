@@ -13,6 +13,7 @@ import CheckpointQuestion from '../../components/lesson/CheckpointQuestion'
 import PracticeBranch from '../../components/lesson/PracticeBranch'
 import Celebration from '../../components/lesson/Celebration'
 import { cx } from '../../lib/utils'
+import { useYouTubeTranscript } from '../../lib/useYouTubeTranscript'
 
 /**
  * A lesson is a deck of slides that fits the screen: Watch → Explore → Prove it (→ Practice when
@@ -21,10 +22,10 @@ import { cx } from '../../lib/utils'
  */
 export default function Lesson() {
   const { courseId, lessonId } = useParams()
-  const { db, awardPoints, upsertLessonProgress, awardBadge } = useData()
+  const { db, awardPoints, upsertLessonProgress, awardBadge, update } = useData()
   const { profile } = useAuth()
 
-  const lesson = lessonById(db, lessonId)
+  const { lesson, status: transcriptStatus } = useYouTubeTranscript(lessonById(db, lessonId), update)
   const course = courseById(db, courseId)
   const lessons = useMemo(() => courseLessons(db, courseId), [db, courseId])
   const idx = lessons.findIndex((l) => l.id === lessonId)
@@ -103,7 +104,7 @@ export default function Lesson() {
     if (key === 'watch') {
       return (
         <div className="h-full grid lg:grid-cols-[minmax(0,1fr)_360px] gap-5">
-          <div className="min-h-[420px] lg:min-h-0"><VideoPlayer lesson={lesson} currentTime={currentTime} onTime={onTime} active={active} /></div>
+          <div className="min-h-[420px] lg:min-h-0"><VideoPlayer lesson={lesson} transcriptStatus={transcriptStatus} currentTime={currentTime} onTime={onTime} active={active} /></div>
           <div className="h-[520px] lg:h-full min-h-0"><TutorChat lesson={lesson} course={course} currentTime={currentTime} studentId={profile.id} /></div>
         </div>
       )

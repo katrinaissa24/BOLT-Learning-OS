@@ -102,7 +102,7 @@ export default function TutorChat({ lesson, course, currentTime, studentId }) {
     const system = `You are tutoring on the lesson "${lesson.title}" in the course "${course.title}".
 Lesson summary: ${lesson.summary}
 Full transcript (seconds → text):
-${lesson.transcript.map((s) => `${s.t}s: ${s.text}`).join('\n')}
+${(lesson.transcript || []).map((s) => `${s.t}s: ${s.text}`).join('\n')}
 The student is currently at ${t}s (${fmtTime(t)}). The transcript segment nearest that moment is: "${seg?.text}".
 Answer in 3–6 short lines. Anchor your answer to what the video is saying at that moment. Use **bold** for the key phrase. End with one small "Try this:" action.`
     const n = messages.filter((m) => m.role === 'user').length
