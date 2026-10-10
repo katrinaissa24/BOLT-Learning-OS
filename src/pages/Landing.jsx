@@ -119,7 +119,7 @@ export default function Landing() {
 function HeroCard() {
   const nodes = [1, 2, 3, 4, 5, 6, 7]
   return (
-    <div className="relative">
+    <div className="relative pb-8">
       <div className="card p-6 rotate-[-1.5deg] shadow-soft">
         <div className="flex items-center justify-between mb-4">
           <div><div className="text-xs uppercase tracking-wide text-charcoal-400 font-semibold">Journey</div><div className="font-extrabold text-lg">Calculus: Change & Motion</div></div>
@@ -129,7 +129,7 @@ function HeroCard() {
           <path d="M20 120 C 90 40, 150 40, 210 100 S 330 160, 400 80 S 480 40, 500 70" fill="none" stroke="#353B48" strokeWidth="6" strokeLinecap="round" strokeDasharray="1 14" />
           <path d="M210 100 C 230 140, 260 150, 300 140" fill="none" stroke="#FF9900" strokeWidth="4" strokeDasharray="6 6" />
           <circle cx="300" cy="140" r="9" fill="#FF9900" />
-          <text x="312" y="144" fontSize="11" fill="#353B48" fontWeight="700">extra practice branch</text>
+          <text x="300" y="162" fontSize="11" textAnchor="middle" fill="#353B48" fontWeight="700">extra practice branch</text>
           {[[20, 120], [95, 66], [150, 60], [210, 100], [305, 136], [400, 80], [500, 70]].map(([x, y], i) => (
             <g key={i}>
               <circle cx={x} cy={y} r="14" fill={i < 4 ? '#FF9900' : i === 4 ? '#fff' : '#E6E8EC'} stroke={i === 4 ? '#FF9900' : 'none'} strokeWidth="4" />
@@ -141,7 +141,7 @@ function HeroCard() {
           {[['1,240', 'points'], ['7', 'stamps'], ['22', 'day streak']].map(([v, l]) => <div key={l} className="rounded-2xl bg-cloud py-3"><div className="text-xl font-extrabold">{v}</div><div className="text-[11px] uppercase tracking-wide text-charcoal-400 font-semibold">{l}</div></div>)}
         </div>
       </div>
-      <div className="absolute -bottom-6 -left-6 card p-4 rotate-[2deg] w-64 hidden md:block">
+      <div className="absolute -bottom-10 -left-8 card p-4 rotate-[2deg] w-64 hidden md:block">
         <div className="text-[11px] uppercase tracking-wide text-charcoal-400 font-semibold mb-1">Parent Lens</div>
         <div className="text-sm font-semibold">Maya understands derivatives. Next: the chain rule — 42 days before the exam.</div>
       </div>

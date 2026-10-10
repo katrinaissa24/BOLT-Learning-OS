@@ -28,6 +28,9 @@
   --color-success-soft: #E3F5EB;
   --color-warning: #FF9900;
   --color-warning-soft: #FFF4E5;
+  --color-caution: #F5B800;
+  --color-caution-soft: #FFF6D6;
+  --color-caution-ink: #9A6B00;
   --color-danger: #E0493B;
   --color-danger-soft: #FCE8E6;
   --color-info: #3B82F6;
@@ -82,7 +85,7 @@ input[type="range"] { accent-color: var(--color-mango); }
 
 /* Simple fade-in */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none; } }
-.fade-up { animation: fadeUp .45s ease both; }
+.fade-up { animation: fadeUp .45s ease backwards; }
 
 /* Passport paper */
 .passport-paper {
