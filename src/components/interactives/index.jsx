@@ -7,6 +7,7 @@ import ProductRuleBox from './math/ProductRuleBox'
 import LimitExplorer from './math/LimitExplorer'
 import RiemannArea from './math/RiemannArea'
 import AverageValue from './math/AverageValue'
+import VectorAdder from './physics/VectorAdder'
 import MotionGraphs from './physics/MotionGraphs'
 import FreeFall from './physics/FreeFall'
 import ForceCart from './physics/ForceCart'
@@ -28,6 +29,7 @@ export const INTERACTIVES = {
   'limit-explorer': LimitExplorer,
   'riemann-area': RiemannArea,
   'average-value': AverageValue,
+  'vector-adder': VectorAdder,
   'motion-graphs': MotionGraphs,
   'free-fall': FreeFall,
   'force-cart': ForceCart,

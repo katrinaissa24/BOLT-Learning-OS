@@ -5,7 +5,7 @@ import { Users, AlertTriangle, FileSearch, Hammer, ArrowRight, MessageCircleQues
 import { PageTitle, Card, StatTile, Button, Pill, Avatar, StatusPill, SectionHeader, SuggestedTag } from '../../components/ui'
 import { useData } from '../../lib/data'
 import { useAuth } from '../../lib/auth'
-import { studentsOf, studentOverview, classOverview, attendanceSummary, lessonById, courseById, EXPECTED_COMPLETED, TODAY } from '../../lib/selectors'
+import { studentsOf, studentOverview, classOverview, attendanceSummary, lessonById, courseById, TODAY } from '../../lib/selectors'
 import { BRAND, STATUS_COLOR, STATUS_LABEL, STATUS_ORDER, ChartTip, axisStyle, LegendRow } from '../../components/teacher/charts'
 import { computeFlags } from '../../components/teacher/flags'
 import { useToast } from '../../components/teacher/Toast'
@@ -32,8 +32,8 @@ export default function Home() {
       const reasons = []
       const weak = o.ov.weakTopics[0]
       if (weak) reasons.push({ icon: AlertTriangle, text: `${weak.name} at ${weak.score}%` })
-      const behindCourses = o.ov.courses.filter((c) => c.completed < EXPECTED_COMPLETED - 1)
-      if (behindCourses.length) reasons.push({ icon: Flag, text: `${behindCourses.map((c) => `${courseById(db, c.courseId).subject} ${c.completed}/7`).join(', ')} checkpoints` })
+      const behindCourses = o.ov.courses.filter((c) => c.completed < c.expected - 1)
+      if (behindCourses.length) reasons.push({ icon: Flag, text: `${behindCourses.map((c) => `${courseById(db, c.courseId).subject} ${c.completed}/${c.total}`).join(', ')} checkpoints` })
       if (o.att.absent >= 3) reasons.push({ icon: CalendarX, text: `${o.att.absent} absences since September` })
       const flagged = db.submissions.find((s) => s.student_id === o.student.id && s.status === 'flagged')
       if (flagged) reasons.push({ icon: ShieldAlert, text: `Essay flagged: ${computeFlags(flagged)[0]?.label || 'needs review'}` })

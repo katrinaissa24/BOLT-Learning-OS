@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Sparkles, Trophy, Zap, Bot } from 'lucide-react'
-import { Pill, Button } from '../ui'
+import { ArrowLeft, Trophy, Zap, Bot } from 'lucide-react'
+import { Pill, Button, AITag } from '../ui'
 import { badgeIcon } from '../passport/icons'
 import { cx } from '../../lib/utils'
 import { aiEnabled } from '../../lib/ai'
@@ -16,7 +16,7 @@ export const readCounters = () => { try { return JSON.parse(localStorage.getItem
 export const bumpCounter = (k, by = 1) => { const c = readCounters(); c[k] = (c[k] || 0) + by; try { localStorage.setItem(KEY, JSON.stringify(c)) } catch { /* ignore */ } return c[k] }
 
 /** Shared header for every game. */
-export function GameShell({ title, eyebrow, icon: Icon, badge, course, children, progress }) {
+export function GameShell({ title, eyebrow, icon: Icon, badge, course, children, progress, ai = false }) {
   const BadgeIcon = badge ? badgeIcon(badge.icon) : null
   return (
     <div>
@@ -26,13 +26,12 @@ export function GameShell({ title, eyebrow, icon: Icon, badge, course, children,
           <div className="w-14 h-14 rounded-2xl bg-charcoal text-mango flex items-center justify-center shadow-soft shrink-0"><Icon size={28} /></div>
           <div>
             <div className="font-hand text-mango text-2xl leading-none mb-1">{eyebrow}</div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-charcoal leading-none">{title}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-charcoal leading-none flex items-center gap-2">{title} {ai && <AITag className="text-xs" />}</h1>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {course && <Pill tone="outline"><span className="w-2 h-2 rounded-full mr-1" style={{ background: course.color }} />{course.subject}</Pill>}
           {badge && <Pill tone={badge.earned ? 'success' : 'neutral'} className="normal-case tracking-normal text-xs"><BadgeIcon size={12} /> {badge.name}{badge.earned ? ' · earned' : progress ? ` · ${progress}` : ''}</Pill>}
-          <Pill tone={aiEnabled ? 'mango' : 'neutral'} icon={Sparkles} className="normal-case tracking-normal text-xs">{aiEnabled ? 'Live AI' : 'AI demo mode'}</Pill>
         </div>
       </div>
       {children}
