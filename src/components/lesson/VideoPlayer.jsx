@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { Youtube, ListVideo, WifiOff, BookOpen, Target } from 'lucide-react'
 import { fmtTime, cx } from '../../lib/utils'
 
-/** Loads the YouTube IFrame API once. Resolves with window.YT or rejects when blocked / slow. */
-function loadYT(timeoutMs = 4000) {
-  return new Promise((resolve, reject) => {
-    if (window.YT?.Player) return resolve(window.YT)
+/** Loads the YouTube IFrame API once (shared promise). Resolves with window.YT or rejects when blocked / slow. */
+let ytPromise = null
+export function loadYT(timeoutMs = 6000) {
+  if (window.YT?.Player) return Promise.resolve(window.YT)
+  if (ytPromise) return ytPromise
+  ytPromise = new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('yt-timeout')), timeoutMs)
     const prev = window.onYouTubeIframeAPIReady
     window.onYouTubeIframeAPIReady = () => { clearTimeout(timer); prev?.(); resolve(window.YT) }
@@ -15,7 +17,8 @@ function loadYT(timeoutMs = 4000) {
       s.onerror = () => { clearTimeout(timer); reject(new Error('yt-blocked')) }
       document.head.appendChild(s)
     }
-  })
+  }).catch((err) => { ytPromise = null; throw err })
+  return ytPromise
 }
 
 /**
@@ -111,6 +114,7 @@ function YouTubeLesson({ lesson, currentTime, onTime, active = true }) {
         {mode === 'fallback' && (
           <iframe title={lesson.title} className="absolute inset-0 w-full h-full" src={`https://www.youtube-nocookie.com/embed/${lesson.youtube_id}?rel=0&modestbranding=1`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
         )}
+        {mode === 'loading' && <img src={`https://i.ytimg.com/vi/${lesson.youtube_id}/hqdefault.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none" />}
         {mode === 'loading' && <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70 text-sm pointer-events-none"><Youtube size={28} className="text-mango" /> Loading video…</div>}
       </div>
 
