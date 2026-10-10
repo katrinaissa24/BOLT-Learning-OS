@@ -6,6 +6,8 @@ import Anthropic from '@anthropic-ai/sdk'
  */
 const MODEL = 'claude-sonnet-5-5'
 const MAX_TOKENS_CAP = 4096
+// Small budgets get cut off mid-sentence (the model may spend tokens before writing). Length is controlled by the prompt.
+const MAX_TOKENS_FLOOR = 2048
 
 export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -20,7 +22,7 @@ export default async function handler(req, res) {
     const client = new Anthropic({ apiKey })
     const r = await client.messages.create({
       model: MODEL,
-      max_tokens: Math.min(Number(maxTokens) || 1024, MAX_TOKENS_CAP),
+      max_tokens: Math.min(Math.max(Number(maxTokens) || 1024, MAX_TOKENS_FLOOR), MAX_TOKENS_CAP),
       system,
       messages,
     })

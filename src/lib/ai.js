@@ -36,7 +36,13 @@ export async function ask({ system = '', messages, fallback, maxTokens = 1024 })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
     if (data.stop_reason === 'refusal') return useFallback()
-    return data.text || useFallback()
+    let text = data.text || ''
+    // never show a reply that was cut off: keep complete sentences, else use the fallback
+    if (data.stop_reason === 'max_tokens') {
+      const end = Math.max(text.lastIndexOf('. '), text.lastIndexOf('? '), text.lastIndexOf('! '), /[.?!]$/.test(text) ? text.length - 1 : -1)
+      text = end > 40 ? text.slice(0, end + 1) : ''
+    }
+    return text || useFallback()
   } catch (err) {
     console.warn('[BOLT AI] falling back to demo response:', err?.message || err)
     return useFallback()
